@@ -211,7 +211,6 @@ footer {
     display: flex;
     justify-content: center;
     gap: 50px;
-    margin-bottom: 15px;
     font-size: 15pt;
 }
 
