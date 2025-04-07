@@ -29,7 +29,8 @@ namespace BookStoreAPI.server.Controllers
         {
             var products = await db.BookProduct.ToListAsync();
             if (products == null || !products.Any()) return NotFound("Book products not found.");
-            var sortedBookProducts = products.OrderBy(b => b.CategoryId).ToList();
+          //  var sortedBookProducts = products.OrderBy(b => b.CategoryId).ToList();
+            var sortedBookProducts = products.ToList();
             IBookList response = new BookProductsList { BookProducts = sortedBookProducts };
             return Ok(response);
         }
@@ -68,7 +69,7 @@ namespace BookStoreAPI.server.Controllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> PostNewBookProduct([FromBody] BookProduct newBookProduct)//добавление нового книжного продукта (только для админа)
+        public async Task<IActionResult> PostNewBookProduct([FromBody] BookProduct newBookProduct)//добавление нового книжного продукта 
         {
             db.BookProduct.Add(newBookProduct);
             await db.SaveChangesAsync();
@@ -76,7 +77,7 @@ namespace BookStoreAPI.server.Controllers
         }
 
         [HttpPut("/products/{id}")]
-        public async Task<IActionResult> PutBookProduct(int id, [FromBody] BookProduct updatedBookProduct)//изменение книжного продукта (только для админа)
+        public async Task<IActionResult> PutBookProduct(int id, [FromBody] BookProduct updatedBookProduct)//изменение книжного продукта 
         {
             var product = await db.BookProduct.FindAsync(id);
             if (product == null) return NotFound("Book product with id " + id + " not found.");
@@ -92,7 +93,7 @@ namespace BookStoreAPI.server.Controllers
         }
 
         [HttpDelete("/products/{id}")]
-        public async Task<IActionResult> DeleteBookProduct(int id)//удаление книжного продукта (только для админа)
+        public async Task<IActionResult> DeleteBookProduct(int id)//удаление книжного продукта 
         {
             var product = await db.BookProduct.FindAsync(id);
             if (product == null) return NotFound("Book product with id " + id + " not found.");

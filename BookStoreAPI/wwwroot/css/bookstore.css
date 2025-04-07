@@ -152,7 +152,7 @@ ul.menu {
 }
 
     .name-link:hover .name {
-        color: #806f80; /* Цвет при наведении */
+        color: #806f80; 
         text-decoration: none;
     }
 
@@ -168,8 +168,8 @@ ul.menu {
     font-size: 20pt;
 }
 
-
 .buy-button {
+    position: relative;
     background-color: #806f80;
     color: white;
     border: none;
@@ -178,41 +178,100 @@ ul.menu {
     transition: all 0.3s ease;
     border-radius: 5px;
     font-size: 15pt;
+    overflow: visible; 
+    z-index: 1; /* Добавляем для кнопки */
 }
 
-    .buy-button:hover {
-        background-color: #4f3e4a;
-        transform: translateY(-2px);
+.button-counter {
+    position: absolute;
+    top: -8px; /* Чуть выше для лучшей видимости */
+    right: -8px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 20px; /* Немного больше */
+    height: 20px;
+    font-size: 11px;
+    text-align: center;
+    line-height: 20px;
+    display: none;
+    z-index: 1; 
+}
+
+.buy-button:hover {
+    background-color: #4f3e4a;
+    transform: translateY(-2px);
+}
+
+    .buy-button:disabled {
+        cursor: not-allowed;
     }
+
+
+.cart-link {
+    display: inline-flex; /*для выравнивания элементов */
+    align-items: center;
+    position: relative;
+    padding: 10px 15px; 
+    text-decoration: none;
+}
+
+.cart-counter {
+    position: absolute;
+    top: 5px; /*правый верхний угол -  расположение кружочка*/
+    right: 5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%; /*кружок*/
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    text-align: center;
+    line-height: 18px;
+    display: none;/*по умолчанию скрыт*/
+    z-index: 1; /*чтобы был поверх других элементов */
+}
 
 footer {
     background-color: #4f3e4a;
     color: white;
-    padding: 15px;
+    padding: 20px 15px; 
     text-align: center;
+    width: 100%;
+    box-sizing: border-box; 
 }
 
 .footer-title {
-    margin-bottom: 15px;
+    margin: 0 auto 15px auto;
     font-size: 15pt;
+    max-width: 90%; 
+    line-height: 1.4; 
 }
 
 .links {
     display: flex;
     justify-content: center;
+    align-items: center; 
     gap: 50px;
     font-size: 15pt;
+    flex-wrap: wrap;
+    padding: 0 20px;
 }
 
-.links a {
-    display: block;
-    padding: 10px 25px; /* H W */
-    color: white;
-    text-decoration: none;
-}
+    .links a {
+        display: inline-block; 
+        padding: 10px 25px;
+        color: white;
+        text-decoration: none;
+        min-width: 120px;
+        text-align: center;
+        transition: all 0.3s ease; 
+        border-radius: 5px;
+    }
 
-.links a:hover {
-    background-color: #806f80;
-    border-radius: 5px;
-    text-decoration: none;
- }
+        .links a:hover {
+            background-color: #806f80;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        }

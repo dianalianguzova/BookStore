@@ -26,16 +26,65 @@ async function getAllProducts() {
             </a> 
             <div class="author">${product.author}</div>
             <div class="price">${product.price} руб.</div>
-            <button class="buy-button" data-id="${product.productId}">
-                Добавить в корзину
+            <button class="buy-button" data-id="${product.productId}" data-quantity="${product.availableQuantity}">
+            <span class="button-text">Добавить в корзину</span>
+            <span class="button-counter" id="id-${product.productId}"></span>
             </button>
         </div>
     `).join('');
 
- //   document.querySelectorAll('.buy-button').forEach(button => {
-    //    button.addEventListener('click', function () {addToCart(this.dataset.id);});
-   // });
+     document.querySelectorAll('.buy-button').forEach(button => {
+         button.addEventListener('click', function (event) {
+             const productId = this.dataset.id;
+             const productQuan = parseInt(this.dataset.quantity);
+             addToCart.call(this, event, productId, productQuan); 
+         });
+     });
 }
-//function addToCart(productId) {
 
-//}
+let globalCartItemsCount = 0; //общее количество товаров
+let cartItemsCount = {}; //для каждого товара отдельно / ключ - айди продукта, значение - количество в корзине
+function addToCart(event, productId, productQuan) {
+    const clickedButton = event.target;  //при нажатии на кпопку добавить в корзину меняется цвет и надпись
+
+    clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
+    clickedButton.style.backgroundColor = '#7e9682'; // Зеленый цвет
+
+    globalCartItemsCount++;
+    if (!cartItemsCount[productId]) {
+        cartItemsCount[productId] = 0;
+    }
+    cartItemsCount[productId]++;
+    if (cartItemsCount[productId] >= productQuan) { //если количество товара добавленного превышает доступное
+        clickedButton.disabled = true;//заблокировать дальнейшее добавление товара в корзину
+    }
+
+    updateProductCounter(productId, productQuan);
+    updateCartCounter();
+}
+
+function updateProductCounter(productId, productQuan) {
+    const counter = document.getElementById(`id-${productId}`);
+    if (!counter) return;
+
+    if (cartItemsCount[productId] > 0) {
+        counter.textContent = cartItemsCount[productId];
+        counter.style.display = 'block';
+    }
+    else {
+        counter.style.display = 'none';
+    }
+}
+
+function updateCartCounter() {
+    const globCounter = document.getElementById('cart-counter');
+    if (!globCounter) return;
+
+    if (globalCartItemsCount > 0) {
+        globCounter.textContent = globalCartItemsCount;
+        globCounter.style.display = 'block'; //видимый счетчик
+
+    } else {
+        globCounter.style.display = 'none'; //невидимый счетчик
+    }
+}
