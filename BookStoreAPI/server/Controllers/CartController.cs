@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Net;
+using System.Security.Claims;
 
 namespace BookStoreAPI.server.Controllers
 {
@@ -18,6 +19,46 @@ namespace BookStoreAPI.server.Controllers
         {
             db = dbContext;
         }
+
+        [HttpPost("{id}/item")]
+        public async Task<IActionResult> PostCartItem(int id, [FromBody] CartItem newCartItem) // добавить продукт в корзину
+        {
+            Cart cart;
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
+
+                if (cart == null)  //если корзина не найдена, создаем новую корзину для пользователя
+                { //но так вообще не должно быть, потому что корзина создается автоматически и не тут
+                    cart = new Cart { UserId = int.Parse(userId) };
+                    db.Cart.Add(cart);
+                    await db.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                var sessionId = id.ToString(); 
+                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.SessionId == sessionId); 
+                if (cart == null) //новая сессионная корзина
+                {
+                    cart = new Cart { SessionId = sessionId };
+                    db.Cart.Add(cart);
+                    await db.SaveChangesAsync();
+                }
+            }
+            var bookProduct = await db.BookProduct.FindAsync(newCartItem.ProductId);
+            if (bookProduct == null) return NotFound("Product with id " + newCartItem.ProductId + " not found");
+            if (newCartItem.ProductQuantity > bookProduct.AvailableQuantity)
+                return BadRequest("Not enough available quantity for product with id " + newCartItem.ProductId + ", available quantity: " + bookProduct.AvailableQuantity);
+            if (newCartItem.ProductQuantity <= 0) return BadRequest("Product quantity must be greater than 0");
+            newCartItem.CartId = cart.CartId;
+            cart.CartItems.Add(newCartItem);
+            await db.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetCartItemInfo), new { id = cart.CartId, itemid = newCartItem.CartItemId }, newCartItem);
+        }
+
 
         [HttpGet("all")]
         public async Task<ActionResult<ICartList>> GetAllCarts()//получение списка всех корзин
@@ -71,24 +112,6 @@ namespace BookStoreAPI.server.Controllers
             IBook product = await db.BookProduct.FindAsync(cartItem.ProductId);
             if (product == null) return NotFound("Product with id " + cartItem.ProductId + " not found");
             return Ok(product);
-        }
-
-        [HttpPost("{id}/item")]
-        public async Task<IActionResult> PostCartItem(int id, [FromBody] CartItem newCartItem) //добавить продукт в корзину
-        {
-            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
-            if (cart == null) return NotFound("Cart with id " + id + " not found");
-            var bookProduct = await db.BookProduct.FindAsync(newCartItem.ProductId);
-            if (bookProduct == null) return NotFound("Product with id " + newCartItem.ProductId + " not found");
-
-            if (newCartItem.ProductQuantity > bookProduct.AvailableQuantity) //если количество товара меньше чем хочет добавить пользователь
-                return BadRequest("Not enough available quantity for product with id " + newCartItem.ProductId + ", available quantity: " + bookProduct.AvailableQuantity);
-            if (newCartItem.ProductQuantity <= 0) return BadRequest("Product quantity must be greater than 0");
-
-            newCartItem.CartId = cart.CartId;
-            cart.CartItems.Add(newCartItem);
-            await db.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetCartItemInfo), new { id = cart.CartId, itemid = newCartItem.CartItemId }, newCartItem);
         }
 
         //[HttpGet("")]

@@ -1,6 +1,19 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
     getAllProducts();
 });
+async function checkAuth() {
+    try {
+        const response = await fetch('https://localhost:5001/user/is-auth', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        const data = await response.json();
+        return data; 
+    } catch (error) {
+        console.error('Ошибка при проверке авторизации:', error);
+        return { isAuthenticated: false, userId: null }; 
+    }
+}
 
 async function getAllProducts() {
     try {
@@ -34,7 +47,7 @@ async function getAllProducts() {
     `).join('');
 
      document.querySelectorAll('.buy-button').forEach(button => {
-         button.addEventListener('click', function (event) {
+         button.addEventListener('click',async  function (event) {
              const productId = this.dataset.id;
              const productQuan = parseInt(this.dataset.quantity);
              addToCart.call(this, event, productId, productQuan); 
@@ -44,8 +57,9 @@ async function getAllProducts() {
 
 let globalCartItemsCount = 0; //общее количество товаров
 let cartItemsCount = {}; //для каждого товара отдельно / ключ - айди продукта, значение - количество в корзине
-function addToCart(event, productId, productQuan) {
-    const clickedButton = event.target;  //при нажатии на кпопку добавить в корзину меняется цвет и надпись
+let sessionId = null;
+async function addToCart(event, productId, productQuan) {
+    const clickedButton = event.currentTarget;  //при нажатии на кпопку добавить в корзину меняется цвет и надпись
 
     clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
     clickedButton.style.backgroundColor = '#7e9682'; // Зеленый цвет
@@ -61,6 +75,38 @@ function addToCart(event, productId, productQuan) {
 
     updateProductCounter(productId, productQuan);
     updateCartCounter();
+
+    const cartItem = {
+        ProductId: productId,
+        ProductQuantity: cartItemsCount[productId] 
+    };
+    try {
+        const authInfo = await checkAuth(); 
+        if (authInfo.isAuthenticated) {
+            const userId = authInfo.userId;
+            const response = await fetch(`https://localhost:5001/cart/${userId}/item`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(cartItem)
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+        } else {
+            if (!sessionId)  sessionId = Math.floor(10000000 + Math.random() * 90000000).toString(); //сессионный ID
+         
+            const response = await fetch(`https://localhost:5001/cart/${sessionId}/item`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cartItem)
+            });
+            if (!response.ok) throw new Error(await response.text());
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
 }
 
 function updateProductCounter(productId, productQuan) {
