@@ -23,5 +23,6 @@ namespace BookStoreAPI.server.Model
         [Required]
         [Column("product_quantity")]
         public int ProductQuantity { get; set; }
+        
     }
 }

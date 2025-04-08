@@ -72,34 +72,17 @@ namespace BookStoreAPI.server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ICartItemList>> GetCartContent(int id)//получить содержимое корзины по айди
         {
-            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
+            var cart = await db.Cart
+            .Include(c => c.CartItems) 
+         .FirstOrDefaultAsync(c => c.CartId == id);
+
             if (cart == null) return NotFound("Cart with id " + id + " not found");
+
             if (cart.CartItems == null || !cart.CartItems.Any())
                 return Ok(new CartItemList { CartItems = new List<CartItem>() });
+
             ICartItemList response = new CartItemList { CartItems = cart.CartItems };
             return Ok(response);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCart(int id) //удаление содержимого корзины 
-        {
-            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
-            if (cart == null) return NotFound("Cart with id " + id + " not found.");
-            db.CartItem.RemoveRange(cart.CartItems);
-            await db.SaveChangesAsync();
-            return NoContent();
-        }
-
-        [HttpDelete("{id}/item/{itemid}")]
-        public async Task<IActionResult> DeleteCartItem(int id, int itemid) //удаление одного предмета из корзины
-        {
-            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
-            if (cart == null) return NotFound("Cart with id " + id + " not found");
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == itemid);
-            if (cartItem == null) return NotFound("Cart item with id " + itemid + " not found in cart with id " + id);
-            db.CartItem.Remove(cartItem);
-            await db.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpGet("{id}/item/{itemid}")]
@@ -114,6 +97,50 @@ namespace BookStoreAPI.server.Controllers
             return Ok(product);
         }
 
+        [HttpPost("create/{sessionId}")]
+        public async Task<IActionResult> CreateCart(string sessionId) //создание новой корзины
+        {
+            var existingCart = await db.Cart.FirstOrDefaultAsync(c => c.SessionId == sessionId);
+            if (existingCart != null) return Conflict(new{message = "Cart already exists",cartId = existingCart.CartId});
+            var cart = new Cart{SessionId = sessionId,UserId = null};
+            db.Cart.Add(cart);
+            await db.SaveChangesAsync();
+            return Ok(new {cartId = cart.CartId,sessionId = cart.SessionId});
+        }
+
+        [HttpGet("session/{sessionId}")]
+        public async Task<ActionResult<int>> GetCartIdBySessionId(string sessionId) //найти id корзины по sessionId
+        {
+            var cart = await db.Cart.FirstOrDefaultAsync(c => c.SessionId == sessionId);
+            if (cart == null) return NotFound("Корзина не найдена по sessionId");
+            return Ok(cart.CartId);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCart(int id) //удаление содержимого корзины 
+        {
+            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
+            if (cart == null) return NotFound("Cart with id " + id + " not found.");
+            db.CartItem.RemoveRange(cart.CartItems);
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
+
+
+
+        [HttpDelete("{id}/item/{itemid}")]
+        public async Task<IActionResult> DeleteCartItem(int id, int itemid) //удаление одного предмета из корзины
+        {
+            var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == id);
+            if (cart == null) return NotFound("Cart with id " + id + " not found");
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == itemid);
+            if (cartItem == null) return NotFound("Cart item with id " + itemid + " not found in cart with id " + id);
+            db.CartItem.Remove(cartItem);
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
+
+   
         //[HttpGet("")]
         //public async Task<ICart> GetCartContent( [FromQuery] string sessionId = null, [FromQuery] int? userId = null) {
         //    if (userId.HasValue)

@@ -1,6 +1,9 @@
-body {
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
     font-family: 'Gill Sans', sans-serif;
 }
 
@@ -179,17 +182,17 @@ ul.menu {
     border-radius: 5px;
     font-size: 15pt;
     overflow: visible; 
-    z-index: 1; /* Добавляем для кнопки */
+    z-index: 1; 
 }
 
 .button-counter {
     position: absolute;
-    top: -8px; /* Чуть выше для лучшей видимости */
+    top: -8px; 
     right: -8px;
     background-color: red;
     color: white;
     border-radius: 50%;
-    width: 20px; /* Немного больше */
+    width: 20px; 
     height: 20px;
     font-size: 11px;
     text-align: center;
@@ -198,14 +201,35 @@ ul.menu {
     z-index: 1; 
 }
 
-.buy-button:hover {
-    background-color: #4f3e4a;
-    transform: translateY(-2px);
+.buy-button.added {
+    background-color: #47a655;
+    color: white;
+    padding-right: 15px;
+    position: relative;
+    color: white;
+    border: none;
+    padding: 10px 80px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    font-size: 15pt;
+    overflow: visible;
+    z-index: 1; 
 }
+
+    .buy-button.added:hover {
+        background-color: #47a655; 
+        transform: none; 
+    }
+
 
     .buy-button:disabled {
         cursor: not-allowed;
     }
+.buy-button:hover {
+    background-color: #4f3e4a;
+    transform: translateY(-2px);
+}
 
 
 .cart-link {
@@ -235,10 +259,11 @@ ul.menu {
 footer {
     background-color: #4f3e4a;
     color: white;
-    padding: 20px 15px; 
+    padding: 20px 15px;
     text-align: center;
+    margin-top: auto; 
     width: 100%;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
 .footer-title {
