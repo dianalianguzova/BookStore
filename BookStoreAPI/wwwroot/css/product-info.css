@@ -217,12 +217,29 @@ ul.menu {
     max-width: 200px;
     display: block; 
     margin: 0 auto;
+    position: relative; 
 }
 
-    .buy-button:hover {
-        background-color: #4f3e4a;
-        transform: translateY(-2px);
+.buy-button:hover {
+    background-color: #4f3e4a;
+    transform: translateY(-2px);
+}
+
+    .buy-button.added {
+        background-color: #47a655;
+        font-size: 1rem;
+        font-weight: 600;
     }
+
+.buy-button:disabled {
+    cursor: not-allowed;
+}
+
+    .buy-button.added:hover {
+        background-color: #47a655;
+        transform: none;
+    }
+
 footer {
     background-color: #4f3e4a;
     color: white;

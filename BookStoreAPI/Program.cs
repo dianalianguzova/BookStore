@@ -5,7 +5,6 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавление сервисов в контейнер
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
@@ -17,11 +16,14 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Book Store API", Version = "v1" });
 });
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", policy => {
-        policy.AllowAnyOrigin()
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:5001", "http://127.0.0.1:5001")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -29,21 +31,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
+        options.Cookie.SameSite = SameSiteMode.None; 
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", policy => {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
 
 var app = builder.Build();
 
-// Настройка middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -53,9 +48,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-app.UseCors("AllowAll"); // CORS должен быть перед аутентификацией и авторизацией
-
+app.UseCors("AllowAll"); 
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -69,6 +62,6 @@ app.UseSwaggerUI(c =>
 app.MapRazorPages();
 app.MapControllers();
 
-app.MapFallbackToFile("bookstore.html"); // Обслуживание статического файла
+app.MapFallbackToFile("/bookstore.html");
 
 app.Run();

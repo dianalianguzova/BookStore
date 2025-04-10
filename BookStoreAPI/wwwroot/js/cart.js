@@ -1,6 +1,8 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+﻿
+document.addEventListener('DOMContentLoaded', function () {
     getCartProducts();
 });
+
 async function getCartProducts() { //продукты в корзине
     const userId = localStorage.getItem('userId');
     const sessionId = localStorage.getItem('sessionId');

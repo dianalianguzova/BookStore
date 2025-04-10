@@ -1,5 +1,7 @@
-﻿
+﻿import * as bookstore from './bookstore.js';
 document.addEventListener('DOMContentLoaded', function () {
+    bookstore.loadPage();
+    bookstore.loadCartState();
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     const container = document.getElementById('product-info-container');
@@ -21,6 +23,8 @@ async function getProductInfo(productId) {
 }
 
 function renderProductInfo(product) {
+    const isInCart = bookstore.cartItemsCount[product.productId] > 0;
+
     const container = document.getElementById('product-info-container');
     container.innerHTML = `<div class="product-info-container">
             <div class="product-image-block">
@@ -44,12 +48,23 @@ function renderProductInfo(product) {
             
             <div class="price-block">
                 <p class="price">${product.price} руб.</p>
-                <button class="buy-button" data-id="${product.productId}">
-                    Добавить в корзину
-                </button>
+              <button class="buy-button ${isInCart ? 'added' : ''}" 
+                    data-id="${product.productId}" 
+                    data-quantity="${product.availableQuantity}"
+                    ${isInCart ? 'disabled' : ''}>
+                <span class="button-text">
+                    ${isInCart ? 'Добавлено в корзину' : 'Добавить в корзину'}
+                </span>
+                <span class="button-counter" id="id-${product.productId}"></span>
+            </button>
             </div>
         </div>`;
-  //  document.querySelector('.buy-button').addEventListener('click', function () {
-     //   addToCart(this.dataset.id);
-   // });
+
+    document.querySelectorAll('.buy-button').forEach(button => {
+        button.addEventListener('click', async function (event) {
+            const productId = this.dataset.id;
+            const productQuan = parseInt(this.dataset.quantity);
+            bookstore.addToCart.call(this, event, productId, productQuan);
+        });
+    });
 }

@@ -206,11 +206,9 @@ ul.menu {
     color: white;
     padding-right: 15px;
     position: relative;
-    color: white;
     border: none;
     padding: 10px 80px;
     cursor: pointer;
-    transition: all 0.3s ease;
     border-radius: 5px;
     font-size: 15pt;
     overflow: visible;
@@ -222,10 +220,10 @@ ul.menu {
         transform: none; 
     }
 
-
     .buy-button:disabled {
         cursor: not-allowed;
     }
+
 .buy-button:hover {
     background-color: #4f3e4a;
     transform: translateY(-2px);
