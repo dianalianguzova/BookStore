@@ -185,21 +185,6 @@ ul.menu {
     z-index: 1; 
 }
 
-.button-counter {
-    position: absolute;
-    top: -8px; 
-    right: -8px;
-    background-color: red;
-    color: white;
-    border-radius: 50%;
-    width: 20px; 
-    height: 20px;
-    font-size: 11px;
-    text-align: center;
-    line-height: 20px;
-    display: none;
-    z-index: 1; 
-}
 
 .buy-button.added {
     background-color: #47a655;

@@ -1,14 +1,19 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
     loadPage();
     getAllProducts();
-    loadCartState(); 
+    loadCartState();
 });
 
 export let sessionId = null;
 export let userId = null;
 export let authInfo = null;
-export let globalCartItemsCount = 0; 
+export let globalCartItemsCount = 0;
 export let cartItemsCount = {}; //для каждого товара отдельно / ключ - айди продукта, значение - количество в корзине
+
+export function setGlobalCount(glob) {  // Функция для обновления
+    globalCartItemsCount = glob;
+}
+
 
 export async function checkAuth() {
     try {
@@ -23,8 +28,9 @@ export async function checkAuth() {
     }
 }
 
-export function loadPage() {
+export async function loadPage() {
     authInfo = checkAuth();
+   // localStorage.clear();
     if (!authInfo.isAuthenticated) {
         sessionId = localStorage.getItem('sessionId');
         if (!sessionId) {
@@ -45,6 +51,7 @@ export function loadPage() {
 
 export function loadCartState() {
     const savedCart = localStorage.getItem('cartState');
+    console.log('cart state', savedCart);
     if (savedCart) {
         const parsed = JSON.parse(savedCart);
         globalCartItemsCount = parsed.globalCount || 0;
@@ -53,11 +60,53 @@ export function loadCartState() {
     updateCartCounter();
 }
 
-export function saveCartState() {
-    localStorage.setItem('cartState', JSON.stringify({
-        globalCount: globalCartItemsCount,
-        items: cartItemsCount
-    }));
+async function getAllProducts() {
+    try {
+        const response = await fetch('https://localhost:5001/');
+        if (!response.ok) throw new Error('Ошибка загрузки товаров');
+        const data = await response.json();
+        const products = data.bookProducts;
+        renderProducts(products);
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
+}
+
+export function renderProducts(products) {
+    const container = document.querySelector('.products-container');
+    container.innerHTML = products.map(product => {
+        const isInCart = cartItemsCount[product.productId] > 0;
+        const isDisabled = isInCart || product.availableQuantity <= 0;
+
+        return `<div class="product-card">
+            <img class="image" 
+                 src="${product.image || '../images/plug.png'}" 
+                 alt="${product.name}"
+                 onerror="this.src='../images/plug.png'">
+            <a href="product-info.html?id=${product.productId}" class="name-link">
+                <div class="name">${product.name}</div>
+            </a> 
+            <div class="author">${product.author}</div>
+            <div class="price">${product.price} руб.</div>
+            <button class="buy-button ${isInCart ? 'added' : ''}" 
+                    data-id="${product.productId}" 
+                    data-quantity="${product.availableQuantity}"
+                    ${isDisabled ? 'disabled' : ''}>
+                <span class="button-text">
+                    ${isInCart ? 'Добавлено в корзину' :
+                product.availableQuantity <= 0 ? 'Нет в наличии' : 'Добавить в корзину'}
+                </span>
+            </button>
+        </div>`;
+    }).join('');
+
+    document.querySelectorAll('.buy-button').forEach(button => {
+        button.addEventListener('click', async function (event) {
+            const productId = this.dataset.id;
+            const productQuan = parseInt(this.dataset.quantity);
+            addToCart.call(this, event, productId, productQuan);
+        });
+    });
 }
 
 export async function addToCart(event, productId, productQuan) {
@@ -71,13 +120,9 @@ export async function addToCart(event, productId, productQuan) {
         cartItemsCount[productId] = 0;
     }
     cartItemsCount[productId]++;
-    //  if (cartItemsCount[productId] >= productQuan) { //если количество товара добавленного превышает доступное
-    //      clickedButton.disabled = true;//заблокировать дальнейшее добавление товара в корзину
-    //  }
-
-    //   updateProductCounter(productId, productQuan);
     updateCartCounter();
     saveCartState();
+
     const cartItem = { ProductId: productId, ProductQuantity: cartItemsCount[productId] };
     try {
         if (authInfo.isAuthenticated) {
@@ -98,8 +143,14 @@ export async function addToCart(event, productId, productQuan) {
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        saveCartState();
     }
+}
+
+export function saveCartState() {
+    localStorage.setItem('cartState', JSON.stringify({
+        globalCount: globalCartItemsCount,
+        items: cartItemsCount
+    }));
 }
 
 export function updateProductCounter(productId, productQuan) {
@@ -131,10 +182,10 @@ async function createNewCart(sessionId) {
     try {
         const response = await fetch(`https://localhost:5001/cart/create/${sessionId}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',},
-            body: JSON.stringify({ sessionId: sessionId})
-        });  
-        if (!response.ok)  throw new Error('Ошибка создания корзины');
+            headers: { 'Content-Type': 'application/json', },
+            body: JSON.stringify({ sessionId: sessionId })
+        });
+        if (!response.ok) throw new Error('Ошибка создания корзины');
         const result = await response.json();
         console.log('Новая корзина создана:', result);
         return result;
@@ -144,50 +195,3 @@ async function createNewCart(sessionId) {
     }
 }
 
-async function getAllProducts() {
-    try {
-        const response = await fetch('https://localhost:5001/');
-        if (!response.ok) throw new Error('Ошибка загрузки товаров');
-        const data = await response.json();
-        const products = data.bookProducts;
-        renderProducts(products);
-    } catch (error) {
-        console.error('Ошибка:', error);
-    }
-}
-
- export function renderProducts(products) {
-    const container = document.querySelector('.products-container');
-    container.innerHTML = products.map(product => {
-    const isInCart = cartItemsCount[product.productId] > 0;
-
-         return `<div class="product-card">
-            <img class="image" 
-                 src="${product.image || '../images/plug.png'}" 
-                 alt="${product.name}"
-                 onerror="this.src='../images/plug.png'">
-            <a href="product-info.html?id=${product.productId}" class="name-link">
-                <div class="name">${product.name}</div>
-            </a> 
-            <div class="author">${product.author}</div>
-            <div class="price">${product.price} руб.</div>
-            <button class="buy-button ${isInCart ? 'added' : ''}" 
-                    data-id="${product.productId}" 
-                    data-quantity="${product.availableQuantity}"
-                    ${isInCart ? 'disabled' : ''}>
-                <span class="button-text">
-                    ${isInCart ? 'Добавлено в корзину' : 'Добавить в корзину'}
-                </span>
-                <span class="button-counter" id="id-${product.productId}"></span>
-            </button>
-        </div>`;
-     }).join('');
-
-     document.querySelectorAll('.buy-button').forEach(button => {
-         button.addEventListener('click',async  function (event) {
-             const productId = this.dataset.id;
-             const productQuan = parseInt(this.dataset.quantity);
-             addToCart.call(this, event, productId, productQuan); 
-         });
-     });
-}

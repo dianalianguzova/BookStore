@@ -1,4 +1,6 @@
-﻿
+﻿import { cartItemsCount, userId, sessionId,globalCartItemsCount,  setGlobalCount, saveCartState } from './bookstore.js';
+
+let glob; 
 document.addEventListener('DOMContentLoaded', function () {
     getCartProducts();
 });
@@ -17,6 +19,7 @@ async function getCartProducts() { //продукты в корзине
             }
             else return;
         } catch (error) {
+            console.error('Ошибка:', error);
             return; 
         }
     }
@@ -29,93 +32,171 @@ async function getCartProducts() { //продукты в корзине
         renderProducts(data);
     } catch (error) {
         console.error('Ошибка:', error);
+        return;
     }
 }
 
-async function renderProducts(data) { //список
-    if (!data) {
-        container.innerHTML = '<div class="empty-cart">Ваша корзина пуста</div>';
-        return;
-    }
+async function renderProducts(data) {
     const container = document.getElementById('cart-container');
     if (!container) return;
-    const products = data.cartItems;
-    console.log('Data:', products);
-    if (!products || products.length === 0) {
+    if (!data || !data.cartItems || data.cartItems.length === 0) {
         container.innerHTML = '<div class="empty-cart">Ваша корзина пуста</div>';
-        return;
+        return; 
     }
 
     let html = '';
-    const productMap = new Map(); //группировка по id
+    let total = 0;
     try {
-        for (const cartItem of products) {
+        for (const cartItem of data.cartItems) {
             const productResponse = await fetch(`https://localhost:5001/cart/${cartItem.cartId}/item/${cartItem.cartItemId}`);
+
             if (productResponse.ok) {
                 const product = await productResponse.json();
-                const productId = cartItem.productId;
-                if (productMap.has(productId)) {
-                    const existingItem = productMap.get(productId);
-                    existingItem.quantity += cartItem.productQuantity; 
-                }
-                else {
-                    productMap.set(productId, {
-                        name: product.name || 'Undefined',
-                        price: product.price || 0,
-                        quantity: cartItem.productQuantity || 1,
-                        image: product.image || '../images/plug.png'});
-                }
+                const itemTotal = product.price * cartItem.productQuantity;
+                total += itemTotal;
+                html += `<div class="cart-item" 
+                         data-product-id="${cartItem.productId}" 
+                         data-cart-item-id="${cartItem.cartItemId}"
+                         data-price="${product.price}">
+                        <div class="product-info">
+                            <img src="${product.image || '../images/plug.png'}" 
+                                 alt="${product.name || 'Undefined'}">
+                            <div class="product-name">${product.name || 'Undefined'}</div>
+                        </div>
+                        <div class="product-quantity">
+                            <button class="quantity-btn minus">-</button>
+                            <span class="quantity">${cartItem.productQuantity}</span>
+                            <button class="quantity-btn plus">+</button>
+                        </div>
+                        <div class="product-total">${itemTotal} руб.</div>
+                        <button class="remove-btn">x</button>
+                    </div>`;
             }
-            //пока закоменчено, чтобы при неправильной загрузке одного товара она не обрывалась
-            //else {
-             //   console.error(`Ошибка загрузки товара ${cartItem.cartItemId}:`, error);
-              //  return;
-           // }
         }
 
-        let total = 0;
-        for (const [productId, item] of productMap) {
-            const itemTotal = item.price * item.quantity; //общая сумма за каждый продукт
-            total += itemTotal;
-            html += `<div class="cart-item">
-                    <div class="product-info">
-                        <img src="${item.image}" alt="${item.name}">
-                        <div class="product-name">${item.name}</div>
-                    </div>
-                    <div class="product-quantity">
-                        <button class="quantity-btn minus">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="quantity-btn plus">+</button>
-                    </div>
-                    <div class="product-total">${itemTotal} руб.</div>
-                    <button class="remove-btn">x</button>
-                </div>`;
-        }
         html += `<div class="cart-footer">
-                <div class="total-sum">Итого: ${total} руб.</div>
-                <button class="checkout-btn">Сделать заказ</button>
+                <div class="total-sum">${total} руб.</div>
+                <button class="order-btn">Сделать заказ</button>
             </div>`;
         container.innerHTML = html;
-     //   addCartEventListeners(); //нажатия кнопок 
+        addCartEventListeners();
     } catch (error) {
-        console.error('Ошибка при загрузке товаров:', error);
+        console.error('Ошибка:', error);
+        container.innerHTML = '<div class="error">Ошибка загрузки корзины</div>';
     }
 }
 
-//function addCartEventListeners() {
-//    document.querySelectorAll('.quantity-btn').forEach(btn => {
-//        btn.addEventListener('click', function () {
-//            console.log('Quantity button clicked');
-//        });
-//    });
+function addCartEventListeners() {
+    document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const cartItem = this.closest('.cart-item');
+            const productId = cartItem.getAttribute('data-product-id');
+            const cartItemId = cartItem.getAttribute('data-cart-item-id');
+            setGlobalCount(globalCartItemsCount + 1); //прибавляем к счетчику 
+            cartItemsCount[productId]++; //для отображения кнопок
+            await updateCartItemQuantity(cartItemId, productId, 1);
+            saveCartState();
+        });
+       
+    });
 
-//    document.querySelectorAll('.remove-btn').forEach(btn => {
-//        btn.addEventListener('click', function () {
-//            console.log('Remove button clicked');
-//        });
-//    });
+    document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+        btn.addEventListener('click', async function () {
+       
+            const cartItem = this.closest('.cart-item');
+            const productId = cartItem.getAttribute('data-product-id');
+            const cartItemId = cartItem.getAttribute('data-cart-item-id');
+            setGlobalCount(globalCartItemsCount - 1);
+            cartItemsCount[productId]--;
+            await updateCartItemQuantity(cartItemId, productId, -1);
+            saveCartState();
+        });
+    });
 
-//    document.querySelector('.checkout-btn')?.addEventListener('click', function () {
-//        console.log('Checkout button clicked');
-//    });
-//}
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const cartItem = this.closest('.cart-item');
+            const productId = cartItem.getAttribute('data-product-id');
+            const cartItemId = cartItem.getAttribute('data-cart-item-id');
+
+            const quantityElement = cartItem.querySelector('.quantity');
+            const quantityToRemove = parseInt(quantityElement.textContent);
+            if (cartItemsCount[productId] !== undefined) delete cartItemsCount[productId]; 
+            setGlobalCount(globalCartItemsCount - quantityToRemove); //удаляем из глобаольного счетчика столько, сколько товара было в корзине
+            await removeCartItem(cartItemId, productId);
+            saveCartState();
+        });
+        
+    });
+
+    //document.querySelector('.order-btn')?.addEventListener('click', function () {
+    //});
+}
+
+
+async function updateCartItemQuantity(cartItemId, productId, count) {
+    const cartItemElement = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
+    if (!cartItemElement) return;
+
+    const quantityElement = cartItemElement.querySelector('.quantity');
+    const currentQuantity = parseInt(quantityElement.textContent);
+    const newQuantity = currentQuantity + count; //текущее количество + 1 или -1
+    if (newQuantity < 1) { //удалить из корзины товар если его количество становится 0
+        await removeCartItem(cartItemId, productId);
+        return;
+    }
+    try {
+        const response = await fetch(`https://localhost:5001/cart/item/update/${cartItemId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ProductQuantity: newQuantity })
+        });
+
+        if (!response.ok) return;
+
+        quantityElement.textContent = newQuantity;
+        const price = parseInt(cartItemElement.querySelector('.product-total').textContent) / currentQuantity;
+        cartItemElement.querySelector('.product-total').textContent = `${(price * newQuantity)} руб.`;
+        updateTotalSum();
+    } catch (error) {
+        console.error('Ошибка:', error);
+        quantityElement.textContent = currentQuantity;
+        return;
+    }
+}
+
+async function removeCartItem(cartItemId, productId) {
+    try {
+        const cartItemElement = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
+        if (!cartItemElement) return;
+        const targetId = userId || sessionId;
+        if (!targetId) return;
+
+        const response = await fetch(`https://localhost:5001/cart/${targetId}/item/${cartItemId}`, {
+            method: 'DELETE',  
+            headers: { 'Content-Type': 'application/json' } 
+        });
+
+        if (!response.ok) return;
+        cartItemElement.remove(); //из дом удаляем
+        updateTotalSum();
+
+        const container = document.getElementById('cart-container'); //если в корзине не осталось элементов
+        if (container.querySelectorAll('.cart-item').length === 0) {
+            container.innerHTML = '<div class="empty-cart">Ваша корзина пуста</div>';
+        }
+    }
+    catch (error) {
+        console.error('Ошибка:', error);
+        return;
+    }
+}
+
+function updateTotalSum() {
+    let total = 0;
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const itemTotal = parseInt(item.querySelector('.product-total').textContent);
+        total += itemTotal;
+    });
+    document.querySelector('.total-sum').textContent = `${total} руб.`;
+}

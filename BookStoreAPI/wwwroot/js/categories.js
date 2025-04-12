@@ -3,8 +3,7 @@
 const container = document.querySelector('.products-container');
 document.addEventListener('DOMContentLoaded', function () {
     bookstore.loadPage();
-    bookstore.loadCartState();
-    const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл
+    const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл ИСПРАВИТЬ 
     const categoryId = urlParams.get('categoryId');
     if (categoryId) {
         getProductsByCategory(categoryId);
