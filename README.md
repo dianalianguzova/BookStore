@@ -6,6 +6,9 @@ BookStoreAPI - api, предоставляющее функциональнос�
 
 ![ER-диаграмма](ER.png)
 
+# BookStore
+`https://localhost:5001/bookstore.html`
+
 # Маршруты API
 ## Маршруты BookProduct
 ### GET
