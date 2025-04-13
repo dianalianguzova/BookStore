@@ -1,7 +1,9 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
-    loadPage();
-    getAllProducts();
     loadCartState();
+    if (window.location.pathname.includes('bookstore.html')) {
+        getAllProducts();
+        loadPage();
+    }
 });
 
 export let sessionId = null;
@@ -10,7 +12,7 @@ export let authInfo = null;
 export let globalCartItemsCount = 0;
 export let cartItemsCount = {}; //для каждого товара отдельно / ключ - айди продукта, значение - количество в корзине
 
-export function setGlobalCount(glob) {  // Функция для обновления
+export function setGlobalCount(glob) { 
     globalCartItemsCount = glob;
 }
 
@@ -29,23 +31,28 @@ export async function checkAuth() {
 }
 
 export async function loadPage() {
-    authInfo = checkAuth();
-   // localStorage.clear();
-    if (!authInfo.isAuthenticated) {
-        sessionId = localStorage.getItem('sessionId');
-        if (!sessionId) {
-            sessionId = Math.floor(10000000 + Math.random() * 90000000).toString(); //сессионный ID
-            localStorage.setItem('sessionId', sessionId);
-            console.log('Новая корзина создана:');
-            createNewCart(sessionId); //создание сессионной корзины
+    try {
+        authInfo = checkAuth();
+        // localStorage.clear();
+        if (!authInfo.isAuthenticated) {
+            sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                sessionId = Math.floor(10000000 + Math.random() * 90000000).toString(); //сессионный ID (надо поменять его)
+                localStorage.setItem('sessionId', sessionId);
+                console.log('Новая корзина создана:');
+                createNewCart(sessionId); //создание сессионной корзины
+            }
+        }
+        else {
+            userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = authInfo.userId;
+                localStorage.setItem('userId', userId);
+            }
         }
     }
-    else {
-        userId = localStorage.getItem('userId');
-        if (!userId) {
-            userId = authInfo.userId;
-            localStorage.setItem('userId', userId);
-        }
+    catch (error) {
+        console.error('Ошибка:', error);
     }
 }
 
@@ -68,17 +75,18 @@ async function getAllProducts() {
         const products = data.bookProducts;
         renderProducts(products);
     } catch (error) {
-        console.error('Ошибка:', error);
+        window.location.href = 'https://localhost:5001/error.html';
+        console.error('Ошибка:', error);    
     }
 }
 
 export function renderProducts(products) {
-    const container = document.querySelector('.products-container');
-    container.innerHTML = products.map(product => {
-        const isInCart = cartItemsCount[product.productId] > 0;
-        const isDisabled = isInCart || product.availableQuantity <= 0;
+    const container = document.querySelector('.products-container'); 
+    container.innerHTML += products.map(product => {
+            const isInCart = cartItemsCount[product.productId] > 0;
+            const isDisabled = isInCart || product.availableQuantity <= 0;
 
-        return `<div class="product-card">
+            return `<div class="product-card">
             <img class="image" 
                  src="${product.image || '../images/plug.png'}" 
                  alt="${product.name}"
@@ -94,19 +102,19 @@ export function renderProducts(products) {
                     ${isDisabled ? 'disabled' : ''}>
                 <span class="button-text">
                     ${isInCart ? 'Добавлено в корзину' :
-                product.availableQuantity <= 0 ? 'Нет в наличии' : 'Добавить в корзину'}
+                    product.availableQuantity <= 0 ? 'Нет в наличии' : 'Добавить в корзину'}
                 </span>
             </button>
         </div>`;
-    }).join('');
+        }).join('');
 
-    document.querySelectorAll('.buy-button').forEach(button => {
-        button.addEventListener('click', async function (event) {
-            const productId = this.dataset.id;
-            const productQuan = parseInt(this.dataset.quantity);
-            addToCart.call(this, event, productId, productQuan);
+        document.querySelectorAll('.buy-button').forEach(button => {
+            button.addEventListener('click', async function (event) {
+                const productId = this.dataset.id;
+                const productQuan = parseInt(this.dataset.quantity);
+                addToCart.call(this, event, productId, productQuan);
+            });
         });
-    });
 }
 
 export async function addToCart(event, productId, productQuan) {
@@ -187,11 +195,9 @@ async function createNewCart(sessionId) {
         });
         if (!response.ok) throw new Error('Ошибка создания корзины');
         const result = await response.json();
-        console.log('Новая корзина создана:', result);
         return result;
     } catch (error) {
-        console.error('Ошибка при создании корзины:', error);
-        throw error;
+        console.error('Ошибка:', error);
     }
 }
 

@@ -3,7 +3,7 @@
 const container = document.querySelector('.products-container');
 document.addEventListener('DOMContentLoaded', function () {
     bookstore.loadPage();
-    const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл ИСПРАВИТЬ 
+    const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл 
     const categoryId = urlParams.get('categoryId');
     if (categoryId) {
         getProductsByCategory(categoryId);
@@ -50,8 +50,8 @@ async function getProductsByCategory(category_id) { //получить все п
         container.innerHTML = `<h2>${categoryName}</h2>`; 
         renderProducts(data.bookProducts); 
     } catch (error) {
+        window.location.href = 'https://localhost:5001/error.html';
         console.error('Ошибка:', error);
-        container.innerHTML = '<div class="error">Ошибка загрузки товаров</div>';
     }
 }
 

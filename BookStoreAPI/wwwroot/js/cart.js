@@ -20,6 +20,7 @@ async function getCartProducts() { //продукты в корзине
             else return;
         } catch (error) {
             console.error('Ошибка:', error);
+            window.location.href = 'https://localhost:5001/error.html';
             return; 
         }
     }
@@ -32,6 +33,7 @@ async function getCartProducts() { //продукты в корзине
         renderProducts(data);
     } catch (error) {
         console.error('Ошибка:', error);
+        window.location.href = 'https://localhost:5001/error.html';
         return;
     }
 }
@@ -82,7 +84,6 @@ async function renderProducts(data) {
         addCartEventListeners();
     } catch (error) {
         console.error('Ошибка:', error);
-        container.innerHTML = '<div class="error">Ошибка загрузки корзины</div>';
     }
 }
 

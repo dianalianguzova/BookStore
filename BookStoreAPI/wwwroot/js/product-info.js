@@ -1,13 +1,12 @@
-﻿import * as bookstore from './bookstore.js';
+﻿import { addToCart, loadPage, loadCartState, cartItemsCount } from './bookstore.js';
 document.addEventListener('DOMContentLoaded', function () {
-    bookstore.loadPage();
-    bookstore.loadCartState();
+    loadPage();
+    loadCartState();
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     const container = document.getElementById('product-info-container');
-    if (!productId) {
-        return; //сделать надпись об ошибке
-    }
+    if (!productId) return; 
+    
     getProductInfo(productId);
 });
 
@@ -18,16 +17,15 @@ async function getProductInfo(productId) {
         const book = await response.json();
         renderProductInfo(book);
     } catch (error) {
+        window.location.href = 'https://localhost:5001/error.html';
         console.error('Ошибка:', error);
     }
 }
 
 function renderProductInfo(product) {
-    const isInCart = bookstore.cartItemsCount[product.productId] > 0;
-
+    const isInCart = cartItemsCount[product.productId] > 0;
     const container = document.getElementById('product-info-container');
-    container.innerHTML = `<div class="product-info-container">
-            <div class="product-image-block">
+    container.innerHTML = `<div class="product-image-block">
                 <div class="image-container">
                     <img src="${product.image || 'https://via.placeholder.com/250x350?text=No+Image'}" 
                          alt="${product.name}"
@@ -64,7 +62,7 @@ function renderProductInfo(product) {
         button.addEventListener('click', async function (event) {
             const productId = this.dataset.id;
             const productQuan = parseInt(this.dataset.quantity);
-            bookstore.addToCart.call(this, event, productId, productQuan);
+            addToCart.call(this, event, productId, productQuan);
         });
     });
 }
