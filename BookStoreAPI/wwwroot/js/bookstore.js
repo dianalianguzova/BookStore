@@ -1,64 +1,90 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
-    loadCartState();
-    if (window.location.pathname.includes('bookstore.html')) {
-        getAllProducts();
-        loadPage();
-    }
-});
-
-export let sessionId = null;
+﻿export let sessionId = null;
 export let userId = null;
-export let authInfo = null;
+export let authInfo = { isAuthenticated: false, userId: null };
 export let globalCartItemsCount = 0;
-export let cartItemsCount = {}; //для каждого товара отдельно / ключ - айди продукта, значение - количество в корзине
-
-export function setGlobalCount(glob) { 
-    globalCartItemsCount = glob;
-}
-
-
-export async function checkAuth() {
+export let cartItemsCount = {};
+document.addEventListener('DOMContentLoaded', async function () {
     try {
-        const response = await fetch('https://localhost:5001/user/is-auth', {
-            method: 'GET',
-        });
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Ошибка при проверке авторизации:', error);
-        return { isAuthenticated: false, userId: null };
-    }
-}
+        const storedAuthInfo = localStorage.getItem('authInfo');
+        if (storedAuthInfo) {
+            authInfo = JSON.parse(storedAuthInfo);
 
-export async function loadPage() {
-    try {
-        authInfo = checkAuth();
-        // localStorage.clear();
-        if (!authInfo.isAuthenticated) {
-            sessionId = localStorage.getItem('sessionId');
-            if (!sessionId) {
-                sessionId = Math.floor(10000000 + Math.random() * 90000000).toString(); //сессионный ID (надо поменять его)
-                localStorage.setItem('sessionId', sessionId);
-                console.log('Новая корзина создана:');
-                createNewCart(sessionId); //создание сессионной корзины
+            if (authInfo.isAuthenticated) { //загружаем данные для кнопок 
+                await updateCartStateAuth(authInfo.userId);
             }
-        }
-        else {
+
+            authInfo = JSON.parse(storedAuthInfo);
+
+            sessionId = localStorage.getItem('sessionId');
             userId = localStorage.getItem('userId');
-            if (!userId) {
+        } 
+
+        if (!sessionStorage.getItem('authChecked')) { //если первый раз заходим на страницу
+            sessionStorage.setItem('authChecked', 'true');
+
+            if (authInfo.isAuthenticated && authInfo.userId) {
                 userId = authInfo.userId;
                 localStorage.setItem('userId', userId);
             }
         }
+
+        if (authInfo.isAuthenticated && authInfo.userId) {
+            await updateCartStateAuth(authInfo.userId);
+        }
+
+        await loadPage();
+        loadCartState();
+
+        if (window.location.pathname.includes('bookstore.html')) {
+            await getAllProducts();
+        }
+    } catch (error) {
+        console.error('Ошибка инициализации:', error);
+    }
+});
+
+
+export async function updateCartStateAuth(userId) {
+    try {
+        const cartResponse = await fetch(`https://localhost:5001/cart/user/${userId}`);
+        if (!cartResponse.ok) throw new Error('Ошибка получения корзины пользователя');
+        const cartId = await cartResponse.json();
+        const contentResponse = await fetch(`https://localhost:5001/cart/${cartId}`);
+        if (!contentResponse.ok) throw new Error('Ошибка получения содержимого корзины');
+
+        const cartContent = await contentResponse.json();     
+        const items = cartContent.cartItems;  
+        globalCartItemsCount = items.length;
+
+        const cartItems = {};
+        items.forEach(item => {
+            if (item.productId) {
+                cartItems[item.productId] = item.productQuantity || 1;
+            }
+        });
+        cartItemsCount = cartItems;
+        saveCartState();
+        updateCartCounter();     
     }
     catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка', error);
     }
 }
 
+export function updateCartCounter() {
+    const globCounter = document.getElementById('cart-counter');
+    if (!globCounter) return;
+
+    if (globalCartItemsCount > 0) {
+        globCounter.textContent = globalCartItemsCount;
+        globCounter.style.display = 'block'; //видимый счетчик
+
+    } else {
+        globCounter.style.display = 'none'; //невидимый счетчик
+    }
+}
 export function loadCartState() {
     const savedCart = localStorage.getItem('cartState');
-    console.log('cart state', savedCart);
     if (savedCart) {
         const parsed = JSON.parse(savedCart);
         globalCartItemsCount = parsed.globalCount || 0;
@@ -66,6 +92,73 @@ export function loadCartState() {
     }
     updateCartCounter();
 }
+export function saveCartState() {
+    localStorage.setItem('cartState', JSON.stringify({
+        globalCount: globalCartItemsCount,
+        items: cartItemsCount
+    }));
+}
+
+export function setGlobalCount(glob) { 
+    globalCartItemsCount = glob;
+}
+export function setAuth(isAuthenticated, userId) {
+    authInfo = { isAuthenticated, userId }; 
+    localStorage.setItem('authInfo', JSON.stringify(authInfo));
+    localStorage.setItem('userId', userId);
+    localStorage.setItem('sessionId', null);
+}
+
+function generateSessionId() {
+    return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+
+
+export async function loadPage() {
+    try {
+       // authInfo = localStorage.getItem('authInfo');
+        if (!authInfo.isAuthenticated) {
+            sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                sessionId = generateSessionId();
+                localStorage.setItem('sessionId', sessionId);
+                await createNewCart(sessionId);
+            }
+        }
+        else if (authInfo.userId) {
+            userId = authInfo.userId;
+            localStorage.setItem('userId', userId);
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке страницы:', error);
+        throw error;
+    }
+}
+
+//export async function checkAuth() {
+//    try {
+//        const response = await fetch('https://localhost:5001/user/is-auth');
+//        const data = await response.json();
+//        return data;
+//    } catch (error) {
+//        console.error('Ошибка при проверке авторизации:', error);
+//        return { isAuthenticated: false, userId: null };
+//    }
+//}
+
+//export async function registerUser(userData) {
+//    const response = await fetch('/api/user/register', {
+//        method: 'POST',
+//        headers: {
+//            'Content-Type': 'application/json',
+//        },
+//        body: JSON.stringify(userData)
+//    });
+//    authInfo.isAuthenticated = true;
+//   // authInfo.userId = userData.userId;
+//    return await response.json();
+//}
+
 
 async function getAllProducts() {
     try {
@@ -75,7 +168,6 @@ async function getAllProducts() {
         const products = data.bookProducts;
         renderProducts(products);
     } catch (error) {
-        window.location.href = 'https://localhost:5001/error.html';
         console.error('Ошибка:', error);    
     }
 }
@@ -118,48 +210,54 @@ export function renderProducts(products) {
 }
 
 export async function addToCart(event, productId, productQuan) {
-    const clickedButton = event.currentTarget;
-    clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
-    clickedButton.style.backgroundColor = '#47a655';
-    clickedButton.disabled = true;
+    try {  
+        const clickedButton = event.currentTarget;
+        clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
+        clickedButton.style.backgroundColor = '#47a655';
+        clickedButton.disabled = true;
 
-    globalCartItemsCount++;
-    if (!cartItemsCount[productId]) {
-        cartItemsCount[productId] = 0;
-    }
-    cartItemsCount[productId]++;
-    updateCartCounter();
-    saveCartState();
+        globalCartItemsCount++;
+        if (!cartItemsCount[productId]) {
+            cartItemsCount[productId] = 0;
+        }
+        cartItemsCount[productId]++;
 
-    const cartItem = { ProductId: productId, ProductQuantity: cartItemsCount[productId] };
-    try {
+        updateCartCounter();
+        saveCartState();
+
+        const cartItemRequest = {
+            Item: {
+                ProductId: productId,
+                ProductQuantity: cartItemsCount[productId],
+            },
+            Auth: authInfo.isAuthenticated
+        };
+
+        
+
         if (authInfo.isAuthenticated) {
             const response = await fetch(`https://localhost:5001/cart/${userId}/item`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(cartItem)
+                body: JSON.stringify(cartItemRequest)
             });
             if (!response.ok) throw new Error(await response.text());
         } else {
             const response = await fetch(`https://localhost:5001/cart/${sessionId}/item`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(cartItem)
+                body: JSON.stringify(cartItemRequest)
             });
             if (!response.ok) throw new Error(await response.text());
         }
+
     } catch (error) {
         console.error('Ошибка:', error);
     }
 }
 
-export function saveCartState() {
-    localStorage.setItem('cartState', JSON.stringify({
-        globalCount: globalCartItemsCount,
-        items: cartItemsCount
-    }));
-}
+
 
 export function updateProductCounter(productId, productQuan) {
     const counter = document.getElementById(`id-${productId}`);
@@ -174,18 +272,6 @@ export function updateProductCounter(productId, productQuan) {
     }
 }
 
-export function updateCartCounter() {
-    const globCounter = document.getElementById('cart-counter');
-    if (!globCounter) return;
-
-    if (globalCartItemsCount > 0) {
-        globCounter.textContent = globalCartItemsCount;
-        globCounter.style.display = 'block'; //видимый счетчик
-
-    } else {
-        globCounter.style.display = 'none'; //невидимый счетчик
-    }
-}
 async function createNewCart(sessionId) {
     try {
         const response = await fetch(`https://localhost:5001/cart/create/${sessionId}`, {
@@ -200,4 +286,32 @@ async function createNewCart(sessionId) {
         console.error('Ошибка:', error);
     }
 }
+
+export async function logout() { //сброс всех значений при выходе из профиля
+    try {
+        authInfo = { isAuthenticated: false, userId: null };
+        localStorage.removeItem('authInfo');
+        localStorage.removeItem('userId');
+
+        sessionId = generateSessionId();
+        localStorage.setItem('sessionId', sessionId);
+        await createNewCart(sessionId);
+
+        cartItemsCount = {};
+        globalCartItemsCount = 0;
+        localStorage.removeItem('cartState');
+
+
+    } catch (error) {
+        console.error('Ошибка:', error);
+       // window.location.href = 'bookstore.html'; 
+    }
+}
+
+
+window.onbeforeunload = function () {
+    authInfo = { isAuthenticated: false, userId: null };
+    sessionStorage.removeItem('authChecked');
+  // localStorage.clear();
+};
 

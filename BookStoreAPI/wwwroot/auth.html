@@ -1,0 +1,53 @@
+﻿
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="vs_showBrowserLink" content="false" />
+    <title>Book Store</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="icon" href="/images/logo.png" type="image/png">
+</head>
+<body>
+    <div class="header">
+        <h1>Book Store</h1>
+    </div>
+
+    <main class="main-content">
+
+        <div id="auth-container" class="auth-container">
+            <div id="phone-form" class="auth-form">
+                <h2>Введите ваш телефон</h2>
+                <input type="tel" id="phone" placeholder="+7 (XXX) XXX-XX-XX" required>
+                <button id="check-phone-btn">Продолжить</button>
+            </div>
+
+            <div id="register-form" class="auth-form" style="display:none;">
+                <h2>Завершите регистрацию</h2>
+                <input type="text" id="name" placeholder="Имя" required>
+                <input type="text" id="surname" placeholder="Фамилия">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="text" id="address" placeholder="Адрес доставки">
+                <button id="register-btn">Зарегистрироваться</button>
+            </div>
+
+            <div id="profile-section" class="profile-section" style="display:none;">
+                <h2>Профиль</h2>
+                <div id="user-info"></div>
+                <button id="edit-profile-btn">Изменить данные</button>
+                <button id="logout-btn">Выйти</button>
+                <button id="return" onclick="window.location.href='bookstore.html'">Вернуться на главную</button>
+            </div>
+        </div>
+        </main>
+
+        <footer>
+            <div class="footer-title">Контакты</div>
+            <div class="links">
+                <a href="#">Telegram</a>
+                <a href="#">VK</a>
+            </div>
+        </footer>
+        <script type="module" src="/js/auth.js"></script>
+</body>
+</html>

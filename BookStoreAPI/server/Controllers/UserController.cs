@@ -32,14 +32,17 @@ namespace BookStoreAPI.server.Controllers
             });
         }
 
+        [HttpGet("check-phone/{phone}")]
+        public async Task<ActionResult<IUser>> CheckPhone(string phone){
+            var user = await db.User.FirstOrDefaultAsync(u => u.Phone == phone);
+            if (user == null) return NotFound("User  not found.");
+            IUser response = user;
+            return Ok(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<IUser>> GetUserInfo(int id)//информация о пользователе
         {
-            if (!User.Identity.IsAuthenticated) 
-            {
-                return Unauthorized("Пользователь не авторизован."); //401
-            }
-
             var user = await db.User.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound("User  not found.");
             IUser response = user;
@@ -47,12 +50,12 @@ namespace BookStoreAPI.server.Controllers
         }
 
 
-        [HttpGet("check-registration/{email}")]
-        public async Task<IActionResult> CheckUserRegistration(string email)
-        {
-            var user = await db.User.FirstOrDefaultAsync(u => u.Email == email);
-            return Ok(new { isRegistered = user != null });
-        }
+        //[HttpGet("check-registration/{email}")]
+        //public async Task<IActionResult> CheckUserRegistration(string email)
+        //{
+        //    var user = await db.User.FirstOrDefaultAsync(u => u.Email == email);
+        //    return Ok(new { isRegistered = user != null });
+        //}
 
 
         [HttpGet("{id}/cart")]

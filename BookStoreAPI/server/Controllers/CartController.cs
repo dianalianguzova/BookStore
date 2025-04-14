@@ -20,25 +20,28 @@ namespace BookStoreAPI.server.Controllers
             db = dbContext;
         }
 
+
         [HttpPost("{id}/item")]
-        public async Task<IActionResult> PostCartItem(int id, [FromBody] CartItem newCartItem) // добавить продукт в корзину
+        public async Task<IActionResult> PostCartItem(int id, [FromBody] CartItemRequest request) // добавить продукт в корзину
         {
+            bool isAuthenticated = request.Auth;
+            CartItem newCartItem = request.Item;
             Cart cart;
-            if (User.Identity.IsAuthenticated)
+            if (isAuthenticated)
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
+                var userId = id;
+                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
 
                 if (cart == null)  //если корзина не найдена, создаем новую корзину для пользователя
-                { //но так вообще не должно быть, потому что корзина создается автоматически и не тут
-                    cart = new Cart { UserId = int.Parse(userId) };
+                { 
+                    cart = new Cart { UserId = userId };
                     db.Cart.Add(cart);
                     await db.SaveChangesAsync();
                 }
             }
             else
             {
-                var sessionId = id.ToString(); 
+                var sessionId = id.ToString();
                 cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.SessionId == sessionId); 
                 if (cart == null) //новая сессионная корзина
                 {
@@ -77,13 +80,15 @@ namespace BookStoreAPI.server.Controllers
             });
         }
 
+
         [HttpDelete("{id}/item/{itemid}")]
-        public async Task<IActionResult> DeleteCartItem(int id, int itemid) //удаление одного предмета из корзины
+        public async Task<IActionResult> DeleteCartItem(int id, int itemid, [FromBody] DeleteRequest request) //удаление одного предмета из корзины
         {
+            bool isAuthenticated = request.IsAuthenticated;
             Cart cart;
-            if (User.Identity.IsAuthenticated) {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
+            if (isAuthenticated) {
+                var userId = id;
+                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
                 if (cart == null) return NotFound("Корзина для пользователя не найдена");
             }
             else
@@ -138,6 +143,22 @@ namespace BookStoreAPI.server.Controllers
             return Ok(product);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<int>> GetCartIdByUserId(int userId) //найти id корзины по userId
+        {
+            var cart = await db.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
+            if (cart == null) return NotFound("Корзина не найдена по sessionId");
+            return Ok(cart.CartId);
+        }
+
+        [HttpGet("session/{sessionId}")]
+        public async Task<ActionResult<int>> GetCartIdBySessionId(string sessionId) //найти id корзины по sessionId
+        {
+            var cart = await db.Cart.FirstOrDefaultAsync(c => c.SessionId == sessionId);
+            if (cart == null) return NotFound("Корзина не найдена по sessionId");
+            return Ok(cart.CartId);
+        }
+
         [HttpPost("create/{sessionId}")]
         public async Task<IActionResult> CreateCart(string sessionId) //создание новой корзины
         {
@@ -149,13 +170,6 @@ namespace BookStoreAPI.server.Controllers
             return Ok(new {cartId = cart.CartId,sessionId = cart.SessionId});
         }
 
-        [HttpGet("session/{sessionId}")]
-        public async Task<ActionResult<int>> GetCartIdBySessionId(string sessionId) //найти id корзины по sessionId
-        {
-            var cart = await db.Cart.FirstOrDefaultAsync(c => c.SessionId == sessionId);
-            if (cart == null) return NotFound("Корзина не найдена по sessionId");
-            return Ok(cart.CartId);
-        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCart(int id) //удаление содержимого корзины 

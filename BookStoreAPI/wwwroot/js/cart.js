@@ -1,41 +1,40 @@
-﻿import { cartItemsCount, userId, sessionId,globalCartItemsCount,  setGlobalCount, saveCartState } from './bookstore.js';
+﻿import { cartItemsCount, userId, sessionId,globalCartItemsCount, authInfo, setGlobalCount, saveCartState} from './bookstore.js';
 
 let glob; 
 document.addEventListener('DOMContentLoaded', function () {
     getCartProducts();
 });
 
-async function getCartProducts() { //продукты в корзине
+async function getCartProducts() {
     const userId = localStorage.getItem('userId');
     const sessionId = localStorage.getItem('sessionId');
-    let id = userId;
-    if (!userId && sessionId) { //если найден sessionId
-        try {
-            const cartResponse = await fetch(`https://localhost:5001/cart/session/${sessionId}`);
-            if (!cartResponse.ok) throw new Error('Ошибка загрузки');
-            const cartData = await cartResponse.json();
-            if (cartData) {
-                id = cartData; //получен айди корзины
-            }
-            else return;
-        } catch (error) {
-            console.error('Ошибка:', error);
-            window.location.href = 'https://localhost:5001/error.html';
-            return; 
-        }
-    }
+    console.log(userId);
+    console.log(sessionId);
 
+    let cartContent = null;
     try {
-        const response = await fetch(`https://localhost:5001/cart/${id}`);
-        if (!response.ok) throw new Error('Ошибка загрузки товаров');
-        const data = await response.json();
-        console.log('Data from API:', data);
-        renderProducts(data);
+        let cartId;
+        if (userId) {
+            const cartResponse = await fetch(`https://localhost:5001/cart/user/${userId}`);
+            if (!cartResponse.ok) throw new Error('Ошибка получения корзины пользователя');
+            cartId = await cartResponse.json();
+        }
+        else {
+            const cartResponse = await fetch(`https://localhost:5001/cart/session/${sessionId}`);
+            if (!cartResponse.ok) throw new Error('Ошибка получения сессионной корзины');
+           cartId = await cartResponse.json();
+        }
+
+        const contentResponse = await fetch(`https://localhost:5001/cart/${cartId}`);
+        if (!contentResponse.ok) throw new Error('Ошибка получения содержимого корзины');
+
+        cartContent = await contentResponse.json();
+
     } catch (error) {
         console.error('Ошибка:', error);
-        window.location.href = 'https://localhost:5001/error.html';
         return;
     }
+    renderProducts(cartContent);
 }
 
 async function renderProducts(data) {
@@ -123,17 +122,27 @@ function addCartEventListeners() {
             const quantityElement = cartItem.querySelector('.quantity');
             const quantityToRemove = parseInt(quantityElement.textContent);
             if (cartItemsCount[productId] !== undefined) delete cartItemsCount[productId]; 
-            setGlobalCount(globalCartItemsCount - quantityToRemove); //удаляем из глобаольного счетчика столько, сколько товара было в корзине
+            setGlobalCount(globalCartItemsCount - quantityToRemove); //удаляем из глобального счетчика столько, сколько товара было в корзине
             await removeCartItem(cartItemId, productId);
             saveCartState();
         });
         
     });
 
-    //document.querySelector('.order-btn')?.addEventListener('click', function () {
+    //document.querySelectorAll('.order-btn').forEach(btn => {
+    //    btn.addEventListener('click', async function () {
+            
+    //    });
+
     //});
 }
 
+//async function makeOrder() {
+//    const auth = checkAuth();
+//    if (!auth) { //если не в системе, то зарегестрироваться/войти
+
+//    }
+//}
 
 async function updateCartItemQuantity(cartItemId, productId, count) {
     const cartItemElement = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
@@ -172,10 +181,14 @@ async function removeCartItem(cartItemId, productId) {
         if (!cartItemElement) return;
         const targetId = userId || sessionId;
         if (!targetId) return;
+        console.log('id', targetId);
 
         const response = await fetch(`https://localhost:5001/cart/${targetId}/item/${cartItemId}`, {
             method: 'DELETE',  
-            headers: { 'Content-Type': 'application/json' } 
+            headers: { 'Content-Type': 'application/json' } ,
+            body: JSON.stringify({
+                isAuthenticated: authInfo.isAuthenticated
+            })
         });
 
         if (!response.ok) return;
