@@ -8,38 +8,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         const storedAuthInfo = localStorage.getItem('authInfo');
         if (storedAuthInfo) {
             authInfo = JSON.parse(storedAuthInfo);
-
-            if (authInfo.isAuthenticated) { //загружаем данные для кнопок 
-                await updateCartStateAuth(authInfo.userId);
-            }
-
-            authInfo = JSON.parse(storedAuthInfo);
-
-            sessionId = localStorage.getItem('sessionId');
-            userId = localStorage.getItem('userId');
-        } 
-
-        if (!sessionStorage.getItem('authChecked')) { //если первый раз заходим на страницу
-            sessionStorage.setItem('authChecked', 'true');
-
-            if (authInfo.isAuthenticated && authInfo.userId) {
-                userId = authInfo.userId;
-                localStorage.setItem('userId', userId);
-            }
+            userId = authInfo.userId;
         }
 
-        if (authInfo.isAuthenticated && authInfo.userId) {
+        console.log('auth state:', authInfo);
+
+        if (authInfo.isAuthenticated) {
             await updateCartStateAuth(authInfo.userId);
-        }
+        } 
 
         await loadPage();
         loadCartState();
-
-        if (window.location.pathname.includes('bookstore.html')) {
-            await getAllProducts();
+        if (window.location.pathname === '/bookstore.html') {
+            getAllProducts();
         }
+
     } catch (error) {
-        console.error('Ошибка инициализации:', error);
+        console.error('Ошибка:', error);
     }
 });
 
@@ -99,14 +84,18 @@ export function saveCartState() {
     }));
 }
 
-export function setGlobalCount(glob) { 
-    globalCartItemsCount = glob;
-}
-export function setAuth(isAuthenticated, userId) {
-    authInfo = { isAuthenticated, userId }; 
+export function setAuth(userId) {
+    authInfo = {
+        isAuthenticated: true,  
+        userId: userId
+    };
     localStorage.setItem('authInfo', JSON.stringify(authInfo));
     localStorage.setItem('userId', userId);
-    localStorage.setItem('sessionId', null);
+    console.log('Auth updated:', authInfo);
+}
+
+export function setGlobalCount(glob) { 
+    globalCartItemsCount = glob;
 }
 
 function generateSessionId() {
@@ -135,29 +124,26 @@ export async function loadPage() {
     }
 }
 
-//export async function checkAuth() {
-//    try {
-//        const response = await fetch('https://localhost:5001/user/is-auth');
-//        const data = await response.json();
-//        return data;
-//    } catch (error) {
-//        console.error('Ошибка при проверке авторизации:', error);
-//        return { isAuthenticated: false, userId: null };
-//    }
-//}
 
-//export async function registerUser(userData) {
-//    const response = await fetch('/api/user/register', {
-//        method: 'POST',
-//        headers: {
-//            'Content-Type': 'application/json',
-//        },
-//        body: JSON.stringify(userData)
-//    });
-//    authInfo.isAuthenticated = true;
-//   // authInfo.userId = userData.userId;
-//    return await response.json();
-//}
+
+export async function registerUser(userData) {
+    console.log('user data', userData);
+    const response = await fetch('https://localhost:5001/user/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    });
+
+    const user = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(userData.phone)}`)
+    const resp = await user.json();
+    console.log('user data', resp);
+    setAuth(resp.userId);
+
+    console.log('authinfo', authInfo);
+    return await response.json();
+}
 
 
 async function getAllProducts() {
@@ -312,6 +298,17 @@ export async function logout() { //сброс всех значений при �
 window.onbeforeunload = function () {
     authInfo = { isAuthenticated: false, userId: null };
     sessionStorage.removeItem('authChecked');
-  // localStorage.clear();
+   //localStorage.clear();
 };
 
+
+//export async function checkAuth() {
+//    try {
+//        const response = await fetch('https://localhost:5001/user/is-auth');
+//        const data = await response.json();
+//        return data;
+//    } catch (error) {
+//        console.error('Ошибка при проверке авторизации:', error);
+//        return { isAuthenticated: false, userId: null };
+//    }
+//}

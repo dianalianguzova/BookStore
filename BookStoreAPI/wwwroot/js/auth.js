@@ -31,7 +31,7 @@ async function checkPhone() {
         const response = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(phone)}`);
         if (response.ok) { //если есть в системе, то показать профиль
             const data = await response.json();
-            setAuth(true, data.userId);
+            setAuth(data.userId);
             showProfile(data.userId);
         }
         else if (response.status == 404) { //нет в системе - попросить зарегестрироваться
@@ -61,7 +61,6 @@ async function registerNewUser(phone) {
 
     try {
         const user = await registerUser(userData);
-    //    setAuth(true, data.userId);
         showProfile(user.userId);
     } catch (error) {
         console.error('Ошибка регистрации:', error);
@@ -84,6 +83,10 @@ async function showProfile(userId) {
             <div class="info-item">
                 <span class="info-label">Телефон:</span>
                 <span class="info-value">${user.phone || 'Не указан'}</span>
+            </div>
+             <div class="info-item">
+                <span class="info-label">Адрес:</span>
+                <span class="info-value">${user.deliveryAddress || 'Не указан'}</span>
             </div>`;
 
         phoneForm.style.display = 'none';
