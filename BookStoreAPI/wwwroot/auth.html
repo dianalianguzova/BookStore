@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="vs_showBrowserLink" content="false"/>
+    <meta name="vs_showBrowserLink" content="false" />
     <title>Book Store</title>
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="icon" href="/images/logo.png" type="image/png">
 </head>
 <body>
     <div class="header">
-        <h1>Book Store</h1>
+        <h1><a href="bookstore.html" style="text-decoration: none; color: inherit;">Book Store</a></h1>
     </div>
 
     <main class="main-content">
@@ -32,11 +32,20 @@
             </div>
 
             <div id="profile-section" class="profile-section" style="display:none;">
-                <h2>Профиль</h2>
+                <h2>Ваш профиль</h2>
                 <div id="user-info"></div>
-                <button id="edit-profile-btn">Изменить данные</button>
+                <button id="edit-profile">Изменить данные</button>
                 <button id="logout-btn">Выйти</button>
-                <button id="return" onclick="window.location.href='bookstore.html'">Вернуться на главную</button>
+                <button id="delete">Удалить профиль</button>
+            </div>
+
+            <div id="update-profile" class="auth-form" style="display:none;">
+                <h2>Измените ваши данные</h2>
+                <input type="text" id="update-name" placeholder="Имя" required>
+                <input type="text" id="update-surname" placeholder="Фамилия">
+                <input type="email" id="update-email" placeholder="Email" required>
+                <input type="text" id="update-address" placeholder="Адрес доставки">
+                <button id="update-btn">Изменить</button>
             </div>
         </div>
         </main>

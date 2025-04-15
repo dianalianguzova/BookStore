@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BookStoreAPI.server.Controllers
 {
     [Route("/categories")]
+    [Produces("application/json")]
     [ApiController]
     public class CategoryController : Controller
     {

@@ -16,6 +16,7 @@ namespace BookStoreAPI.server.Controllers
 {
     [Route("")]
     [ApiController]
+    [Produces("application/json")]
     public class BookProducsController : Controller
     {
         private readonly DbConnection db;

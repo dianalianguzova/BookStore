@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BookStoreAPI.server.Controllers
 {
     [Route("/order")]
+    [Produces("application/json")]
     [ApiController]
     public class OrderController : Controller
     {

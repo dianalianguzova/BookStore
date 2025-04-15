@@ -17,7 +17,6 @@ async function getProductInfo(productId) {
         const book = await response.json();
         renderProductInfo(book);
     } catch (error) {
-        window.location.href = 'https://localhost:5001/error.html';
         console.error('Ошибка:', error);
     }
 }

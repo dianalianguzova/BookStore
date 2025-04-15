@@ -12,6 +12,7 @@ namespace BookStoreAPI.server.Controllers
 {
     [Route("/cart")]
     [ApiController]
+    [Produces("application/json")]
     public class CartController : Controller
     {
         private readonly DbConnection db;
@@ -181,45 +182,14 @@ namespace BookStoreAPI.server.Controllers
             return NoContent();
         }
 
-
-   
-        //[HttpGet("")]
-        //public async Task<ICart> GetCartContent( [FromQuery] string sessionId = null, [FromQuery] int? userId = null) {
-        //    if (userId.HasValue)
-        //    {
-        //        var userCart = await db.Cart
-        //            .Include(c => c.CartItems)
-        //            .FirstOrDefaultAsync(c => c.UserId == userId);
-        //        if (userCart != null) return new CartItemList { CartItems = userCart.CartItems };
-        //        else
-        //        {
-        //            var newCart = new Cart
-        //            {
-        //                UserId = userId,
-        //                SessionId = Guid.NewGuid().ToString()
-        //            };
-        //            db.Cart.Add(newCart);
-        //            await db.SaveChangesAsync();
-        //            return new CartItemList { CartItems = new List<CartItem>() };
-        //        }
-        //    }
-
-        //    if (string.IsNullOrEmpty(sessionId))  sessionId = Guid.NewGuid().ToString();
-        //    var cart = await db.Cart
-        //        .Include(c => c.CartItems)
-        //        .FirstOrDefaultAsync(c => c.SessionId == sessionId);
-        //    if (cart == null)
-        //    {
-        //        var newCart = new Cart
-        //        {
-        //            SessionId = sessionId
-        //        };
-        //        db.Cart.Add(newCart);
-        //        await db.SaveChangesAsync();
-
-        //        return new CartItemList { CartItems = new List<CartItem>() };
-        //    }
-        //    return new CartItemList { CartItems = cart.CartItems };
-        //}
+        [HttpDelete("session/{id}")]
+        public async Task<IActionResult> DeleteSessionCart(int id) //удаление сессионной корзины
+        {
+            var cart = await db.Cart.FindAsync(id);
+            if (cart == null) return NotFound("Cart with id " + id + " not found.");
+            db.Cart.Remove(cart);
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

@@ -37,6 +37,7 @@
     "BookStoreAPI": {
       "commandName": "Project",
       "dotnetRunMessages": true,
+      "hotReloadEnabled": false,
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {

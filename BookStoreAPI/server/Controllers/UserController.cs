@@ -13,6 +13,7 @@ using System.Security.Claims;
 namespace BookStoreAPI.server.Controllers
 {
     [Route("/user")]
+    [Produces("application/json")]
     [ApiController]
     public class UserController : Controller
     {
@@ -49,23 +50,9 @@ namespace BookStoreAPI.server.Controllers
             return Ok(response);
         }
 
-
-        //[HttpGet("check-registration/{email}")]
-        //public async Task<IActionResult> CheckUserRegistration(string email)
-        //{
-        //    var user = await db.User.FirstOrDefaultAsync(u => u.Email == email);
-        //    return Ok(new { isRegistered = user != null });
-        //}
-
-
         [HttpGet("{id}/cart")]
         public async Task<ActionResult<CartItemList>> GetAllUserCartContent(int id) //содержимое корзины пользователя
         {
-            //if (!User.Identity.IsAuthenticated)
-            //{
-            //    return Unauthorized("Пользователь не авторизован."); //401
-            //}
-
             var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == id);
             if (cart == null) return Ok(new { Message = "No cart items found in cart for user with id " + id });
             var cartContent = new CartItemList { CartItems = cart.CartItems };
@@ -74,19 +61,15 @@ namespace BookStoreAPI.server.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, [FromBody] User updatedUser)//изменить данные пользователя (только для этого пользователя или админа)
+        public async Task<IActionResult> PutUser(int id, [FromBody] User updatedUser)
         {
-            //if (!User.Identity.IsAuthenticated)
-            //{
-            //    return Unauthorized("Пользователь не авторизован."); //401
-            //}
-
             var user = await db.User.FindAsync(id);
             if (user == null) return NotFound();
             user.Name = updatedUser.Name;
             user.Surname = updatedUser.Surname;
-            user.Phone = updatedUser.Phone;
+          //  user.Phone = updatedUser.Phone;
             user.Email = updatedUser.Email;
+            user.deliveryAddress = updatedUser.deliveryAddress;
             await db.SaveChangesAsync();
             return NoContent();
         }
@@ -94,11 +77,7 @@ namespace BookStoreAPI.server.Controllers
 
         [HttpGet("{id}/orders")]
         public async Task<ActionResult<IOrderList>> GetAllUserOrders(int id)
-        {//все заказы пользователя
-            //if (!User.Identity.IsAuthenticated)
-            //{
-            //    return Unauthorized("Пользователь не авторизован."); //401
-            //}
+        {
             var user = await db.User.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound("User  not found.");
             var orders = await db.Order.Where(o => o.user_id == id).ToListAsync();
@@ -113,16 +92,6 @@ namespace BookStoreAPI.server.Controllers
             db.User.Add(newUser);
             await db.SaveChangesAsync();
             var cart = new Cart { UserId = newUser.UserId };
-            //var sessionCart = await db.Cart.FirstOrDefaultAsync(c => c.SessionId == sessionId); //товары из сессионной корзины в обычную
-            //if (sessionCart != null) {
-            //    var cartItems = await db.CartItem.Where(ci => ci.CartId == sessionCart.CartId).ToListAsync();
-            //    foreach (var item in cartItems)
-            //    {
-            //        item.CartId = cart.CartId; 
-            //        db.CartItem.Update(item); 
-            //    }
-            //    db.Cart.Remove(sessionCart);
-            //}
             db.Cart.Add(cart); //создание корзины автоматически
             await db.SaveChangesAsync();
             return CreatedAtAction(nameof(GetUserInfo), new { id = newUser.UserId }, newUser);

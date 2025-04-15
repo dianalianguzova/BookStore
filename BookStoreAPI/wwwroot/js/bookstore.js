@@ -105,7 +105,6 @@ function generateSessionId() {
 
 export async function loadPage() {
     try {
-       // authInfo = localStorage.getItem('authInfo');
         if (!authInfo.isAuthenticated) {
             sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
@@ -124,27 +123,122 @@ export async function loadPage() {
     }
 }
 
+export async function deleteUser(userId) {
+    try {
+        const response = await fetch(`https://localhost:5001/user/${userId}`, {
+            method: 'DELETE'
+        });
 
+        if (!response.ok) return;
+        await logout();
 
-export async function registerUser(userData) {
-    console.log('user data', userData);
-    const response = await fetch('https://localhost:5001/user/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
-    });
-
-    const user = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(userData.phone)}`)
-    const resp = await user.json();
-    console.log('user data', resp);
-    setAuth(resp.userId);
-
-    console.log('authinfo', authInfo);
-    return await response.json();
+        if (response.status !== 204) { 
+            return await response.json();
+        }
+    } catch (error) {
+        console.error("Ошибка", error);
+    }
 }
 
+export async function registerUser(userData) {
+    try {
+        const response = await fetch('https://localhost:5001/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+
+        moveProducts();
+        const user = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(userData.phone)}`)
+        const resp = await user.json(); //достаем айдишку
+        setAuth(resp.userId);
+
+        console.log('authinfo', authInfo);
+        return await response.json();
+    }
+    catch (error) {
+        console.error("Ошибка", error);
+    }
+}
+
+async function moveProducts() { //при регистрации переложить продукты из сессинной корзины в новую пользовательскую
+    try {
+        const sesId = localStorage.getItem('sessionId');
+        const cartResponse = await fetch(`https://localhost:5001/cart/session/${sesId}`);
+
+        if (!cartResponse.ok) throw new Error('Ошибка получения id сессионной корзины');
+        const cartId = await cartResponse.json();
+        const contentResponse = await fetch(`https://localhost:5001/cart/${cartId}`); //все продукты в сессионной корзине
+        if (!contentResponse.ok) throw new Error('Ошибка получения содержимого корзины');
+
+        const cartContent = await contentResponse.json();
+        if (cartContent.cartItems && Array.isArray(cartContent.cartItems)) {
+            for (const [index, item] of cartContent.cartItems.entries()) {
+                await moveCartItem(item.productId, item.productQuantity);
+            } 
+        }
+        deleteSessionCart(cartId);
+    }
+    catch (error) {
+        console.error("Ошибка", error);
+        return;
+    }
+}
+
+async function deleteSessionCart(cartId) {
+    try {
+        const deleteResponse = await fetch(`https://localhost:5001/cart/session/${cartId}`, { //удаляем сессионную корзину
+            method: 'DELETE'
+        });
+        if (deleteResponse.ok)console.log('Корзина удалена');
+
+        if (!deleteResponse.ok) {
+            throw new Error('Ошибка удаления сессионной корзины');
+        }
+
+        localStorage.removeItem('sessionId');
+    }
+
+    catch (error) {
+        console.error("Ошибка", error);
+    }
+}
+
+
+async function moveCartItem(productId, productQuan) {
+    globalCartItemsCount++;
+    if (!cartItemsCount[productId]) {
+        cartItemsCount[productId] = 0;
+    }
+    cartItemsCount[productId] = productQuan;
+
+    updateCartCounter();
+    saveCartState();
+
+    const cartItemRequest = {
+        Item: {
+            ProductId: productId,
+            ProductQuantity: productQuan,
+        },
+        Auth: authInfo.isAuthenticated
+    };
+
+    try {
+        const response = await fetch(`https://localhost:5001/cart/${authInfo.userId}/item`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(cartItemRequest)
+        });
+        if (!response.ok) throw new Error(await response.text());
+    }
+    catch (error) {
+        console.error("Ошибка", error);
+    }
+
+}
 
 async function getAllProducts() {
     try {
@@ -195,7 +289,9 @@ export function renderProducts(products) {
         });
 }
 
-export async function addToCart(event, productId, productQuan) {
+
+
+export async function addToCart(event, productId) {
     try {  
         const clickedButton = event.currentTarget;
         clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
@@ -217,9 +313,7 @@ export async function addToCart(event, productId, productQuan) {
                 ProductQuantity: cartItemsCount[productId],
             },
             Auth: authInfo.isAuthenticated
-        };
-
-        
+        }; 
 
         if (authInfo.isAuthenticated) {
             const response = await fetch(`https://localhost:5001/cart/${userId}/item`, {
@@ -298,7 +392,7 @@ export async function logout() { //сброс всех значений при �
 window.onbeforeunload = function () {
     authInfo = { isAuthenticated: false, userId: null };
     sessionStorage.removeItem('authChecked');
-   //localStorage.clear();
+ // localStorage.clear();
 };
 
 
