@@ -23,11 +23,18 @@ document.addEventListener('DOMContentLoaded', async function () {
             getAllProducts();
         }
 
+        const ordersLink = document.getElementById('orders-link');
+        if (ordersLink) {
+            ordersLink.addEventListener('click', function (e) { //вот тут надо бы исправить...:(
+                const authInfo = localStorage.getItem('authInfo');
+                if (authInfo && JSON.parse(authInfo).isAuthenticated) window.location.href = 'orders.html';
+                else  window.location.href = 'auth.html';
+            });
+        }
     } catch (error) {
         console.error('Ошибка:', error);
     }
 });
-
 
 export async function updateCartStateAuth(userId) {
     try {
@@ -101,7 +108,6 @@ export function setGlobalCount(glob) {
 function generateSessionId() {
     return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
-
 
 export async function loadPage() {
     try {
@@ -252,6 +258,8 @@ async function getAllProducts() {
     }
 }
 
+
+
 export function renderProducts(products) {
     const container = document.querySelector('.products-container'); 
     container.innerHTML += products.map(product => {
@@ -293,6 +301,7 @@ export function renderProducts(products) {
 
 export async function addToCart(event, productId) {
     try {  
+        console.log(userId);
         const clickedButton = event.currentTarget;
         clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
         clickedButton.style.backgroundColor = '#47a655';

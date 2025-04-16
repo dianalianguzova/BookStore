@@ -51,7 +51,7 @@ namespace BookStoreAPI.server.Controllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> PostNewOrder(int userId)//добавление нового заказа
+        public async Task<IActionResult> PostNewOrder([FromBody] int userId)//добавление нового заказа
         {
             var cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
             if (cart == null || !cart.CartItems.Any()) return BadRequest("Cart is empty or not found for user with id " + userId);

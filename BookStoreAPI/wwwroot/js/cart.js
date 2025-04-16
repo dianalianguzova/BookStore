@@ -1,6 +1,5 @@
 ﻿import { cartItemsCount, userId, sessionId,globalCartItemsCount, authInfo, setGlobalCount, saveCartState} from './bookstore.js';
 
-let glob; 
 document.addEventListener('DOMContentLoaded', function () {
     getCartProducts();
 });
@@ -10,7 +9,6 @@ async function getCartProducts() {
     const sessionId = localStorage.getItem('sessionId');
     console.log(userId);
     console.log(sessionId);
-
     let cartContent = null;
     try {
         let cartId;
@@ -80,7 +78,7 @@ async function renderProducts(data) {
                 <button class="order-btn">Сделать заказ</button>
             </div>`;
         container.innerHTML = html;
-        addCartEventListeners();
+        addCartEventListeners(); 
     } catch (error) {
         console.error('Ошибка:', error);
     }
@@ -129,20 +127,40 @@ function addCartEventListeners() {
         
     });
 
-    //document.querySelectorAll('.order-btn').forEach(btn => {
-    //    btn.addEventListener('click', async function () {
-            
-    //    });
-
-    //});
+    document.querySelectorAll('.order-btn').forEach(btn => { //сделать заказ
+        btn.addEventListener('click', async function () {
+            await makeOrder();
+        });
+    });
 }
 
-//async function makeOrder() {
-//    const auth = checkAuth();
-//    if (!auth) { //если не в системе, то зарегестрироваться/войти
+async function makeOrder() {
+    try {
+        const authInfo = JSON.parse(localStorage.getItem('authInfo'));
+        console.log('authdd', authInfo);
+        if (authInfo?.isAuthenticated) {
+            window.location.href = 'order.html';
+        } else {
+            window.location.href = 'auth.html';
+        }
+    }
+    catch (error) {
+        console.error("Ошибка", error);
+    }
+}
 
-//    }
-//}
+export async function getCartItems(userId) {
+    const cartResponse = await fetch(`https://localhost:5001/cart/user/${userId}`);
+    if (!cartResponse.ok) throw new Error('Ошибка получения корзины пользователя');
+    const cartId = await cartResponse.json();
+
+    const contentResponse = await fetch(`https://localhost:5001/cart/${cartId}`);
+    if (!contentResponse.ok) throw new Error('Ошибка получения содержимого корзины');
+
+    const cartContent = await contentResponse.json();
+    return cartContent.cartItems;
+}
+
 
 async function updateCartItemQuantity(cartItemId, productId, count) {
     const cartItemElement = document.querySelector(`.cart-item[data-product-id="${productId}"]`);

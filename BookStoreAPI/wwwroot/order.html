@@ -1,0 +1,66 @@
+﻿<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="vs_showBrowserLink" content="false" />
+    <title>Book Store</title>
+    <link rel="stylesheet" href="/css/order.css">
+    <link rel="icon" href="/images/logo.png" type="image/png">
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <a href="bookstore.html" class="header-link">Book Store</a>
+            <div class="profile-button">
+                <a href="auth.html" class="profile-link">
+                    <img src="/images/profile.png" alt="profile" class="profile-icon">
+                </a>
+            </div>
+        </h1>
+    </div>
+
+    <div class="order-container">
+        <h2>Оформление заказа</h2>
+
+        <div class="user-info">
+            <h2>Ваши данные</h2>
+            <div class="info-row">
+                <span>Имя:</span>
+                <span id="user-name"></span>
+            </div>
+            <div class="info-row">
+                <span>Фамилия:</span>
+                <span id="user-surname"></span>
+            </div>
+            <div class="info-row">
+                <span>Телефон:</span>
+                <span id="user-phone"></span>
+            </div>
+            <div class="info-row">
+                <span>Адрес доставки:</span>
+                <span id="user-address"></span>
+            </div>
+        </div>
+
+        <div class="order-items">
+            <h2>Ваш заказ</h2>
+            <div id="order-items-container"></div>
+            <div class="order-total">
+                <span>Итого:</span>
+                <span id="order-total-amount"></span>
+            </div>
+        </div>
+
+        <button id="confirm-order-btn" class="confirm-btn">Подтвердить заказ</button>
+    </div>
+
+    <footer>
+        <div class="footer-title">Контакты</div>
+        <div class="links">
+            <a href="#">Telegram</a>
+            <a href="#">VK</a>
+        </div>
+    </footer>
+    <script type="module" src="/js/order.js"></script>
+</body>
+</html>

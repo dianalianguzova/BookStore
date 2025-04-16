@@ -15,13 +15,13 @@ async function getProductInfo(productId) {
         const response = await fetch(`https://localhost:5001/product/${productId}`);
         if (!response.ok) throw new Error('Информация о продукте не найдена');
         const book = await response.json();
-        renderProductInfo(book);
+        await renderProductInfo(book);
     } catch (error) {
         console.error('Ошибка:', error);
     }
 }
 
-function renderProductInfo(product) {
+async function renderProductInfo(product) {
     const isInCart = cartItemsCount[product.productId] > 0;
     const container = document.getElementById('product-info-container');
     container.innerHTML = `<div class="product-image-block">
@@ -61,7 +61,7 @@ function renderProductInfo(product) {
         button.addEventListener('click', async function (event) {
             const productId = this.dataset.id;
             const productQuan = parseInt(this.dataset.quantity);
-            addToCart.call(this, event, productId, productQuan);
+            await addToCart.call(this, event, productId, productQuan);
         });
     });
 }
