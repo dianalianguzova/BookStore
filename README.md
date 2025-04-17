@@ -1,7 +1,7 @@
 # Описание 
 BookStore - книжный интернет-магазин.
 
-## 🛠 
+## 🛠 Технологии
 | Backend | Frontend |
 |--------|----------|
 | PostgreSQL | VanillaJS  | 
@@ -13,7 +13,7 @@ BookStore - книжный интернет-магазин.
 
 ![ER-диаграмма](ER.png)
 
-#API endpoints
+# API endpoints
 ## BookProduct 
 
 | Method | Endpoint | Description |
@@ -79,3 +79,8 @@ BookStore - книжный интернет-магазин.
 
 # BookStore
 📌 **Главная страница**: `/bookstore.html`  
+📌 **Личный кабинет**: `/auth.html`  
+📌 **Корзина**: `/cart.html`  
+📌 **Категории**: `/categories.html`
+📌 **Заказы**: `/orders.html`
+📌 **Страница продукта**: `/product-info.html`
