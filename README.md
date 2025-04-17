@@ -78,9 +78,14 @@ BookStore - книжный интернет-магазин.
   `/swagger`
 
 # BookStore
-📌 **Главная страница**: `/bookstore.html`  
-📌 **Личный кабинет**: `/auth.html`  
-📌 **Корзина**: `/cart.html`  
+📌 **Главная страница**: `/bookstore.html`
+
+📌 **Личный кабинет**: `/auth.html`
+
+📌 **Корзина**: `/cart.html`
+  
 📌 **Категории**: `/categories.html`
+
 📌 **Заказы**: `/orders.html`
+
 📌 **Страница продукта**: `/product-info.html`
