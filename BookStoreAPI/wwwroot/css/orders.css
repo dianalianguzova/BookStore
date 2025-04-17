@@ -1,0 +1,243 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+}
+
+.header-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Gill Sans', sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    background-color: #4f3e4a;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    position: relative; /* для позиционирования кнопки */
+}
+
+h2 {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 100px;
+    margin-bottom: 50px;
+    color: #4f3e4a;
+    font-weight: 600;
+}
+
+
+.profile-button {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #4f3e4a;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+    .profile-link:hover {
+        background-color: #806f80;
+    }
+
+.profile-icon {
+    width: 25px;
+    height: 25px;
+    object-fit: cover;
+}
+
+
+
+.orders-container {
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+    .orders-container h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+.orders-list {
+    gap: 50px;
+}
+
+.order-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-id {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.order-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+    background-color: #47a655;
+    color: white;
+}
+/*
+    .order-status.created {
+        background-color: #47a655;
+        color: white;
+    }
+
+    .order-status.completed {
+        background-color: #47a655;
+        color: white;
+    }
+
+    .order-status.cancelled {
+        background-color: #e74c3c;
+        color: white;
+    }*/
+
+.order-details div {
+    color: #555;
+}
+
+.order-date {
+    font-size: 0.9em;
+}
+
+.order-address {
+    margin-bottom: 25px !important;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.order-total {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.order-items-list {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+
+.empty-orders {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.5rem;
+    margin: 0 0 5px 0;
+    color: #4f3e4a;
+    font-weight: 600;
+}
+
+footer {
+    background-color: #4f3e4a;
+    color: white;
+    padding: 20px 15px;
+    text-align: center;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-title {
+    margin: 0 auto 15px auto;
+    font-size: 15pt;
+    max-width: 90%;
+    line-height: 1.4;
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    font-size: 15pt;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+    .links a {
+        display: inline-block;
+        padding: 10px 25px;
+        color: white;
+        text-decoration: none;
+        min-width: 120px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+    }
+
+        .links a:hover {
+            background-color: #806f80;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }

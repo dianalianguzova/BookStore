@@ -10,9 +10,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             authInfo = JSON.parse(storedAuthInfo);
             userId = authInfo.userId;
         }
-
-        console.log('auth state:', authInfo);
-
+       // console.log('auth state:', authInfo);
         if (authInfo.isAuthenticated) {
             await updateCartStateAuth(authInfo.userId);
         } 
@@ -98,7 +96,7 @@ export function setAuth(userId) {
     };
     localStorage.setItem('authInfo', JSON.stringify(authInfo));
     localStorage.setItem('userId', userId);
-    console.log('Auth updated:', authInfo);
+   // console.log('Auth updated:', authInfo);
 }
 
 export function setGlobalCount(glob) { 
@@ -160,8 +158,6 @@ export async function registerUser(userData) {
         const user = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(userData.phone)}`)
         const resp = await user.json(); //достаем айдишку
         setAuth(resp.userId);
-
-        console.log('authinfo', authInfo);
         return await response.json();
     }
     catch (error) {
@@ -301,7 +297,6 @@ export function renderProducts(products) {
 
 export async function addToCart(event, productId) {
     try {  
-        console.log(userId);
         const clickedButton = event.currentTarget;
         clickedButton.querySelector('.button-text').textContent = "Добавлено в корзину";
         clickedButton.style.backgroundColor = '#47a655';

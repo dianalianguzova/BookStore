@@ -2,7 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     const authInfo = JSON.parse(localStorage.getItem('authInfo'));
-    console.log(authInfo);
     await loadUserData(authInfo.userId);
 
     await loadOrderItems(authInfo.userId);
@@ -72,10 +71,8 @@ async function submitOrder(userId) {
             body: userId.toString() 
         });
 
-        if (response.ok) {
-            const order = await response.json();
-            alert('Заказ успешно оформлен! Номер вашего заказа: ' + order.order_id);
-            window.location.href = 'bookstore.html';
+        if (response.status == 201) {
+            window.location.assign('grat.html'); 
         } 
     } catch (error) {
         console.error('Ошибка:', error);

@@ -245,6 +245,7 @@ ul.menu {
 }
 
 .order-item {
+    
     display: flex;
     justify-content: space-between;
     padding: 15px 0;
@@ -288,6 +289,42 @@ ul.menu {
 
     .order-total span:last-child {
         color: #e74c3c;
+    }
+
+.order-grat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top:200px!important;
+    color: #2ecc71;
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.return-btn {
+    width: 250px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    text-align: center;
+    background-color: #4f3e4a;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .return-btn:hover {
+        background-color: #806f80;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
 .confirm-btn {

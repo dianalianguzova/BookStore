@@ -33,9 +33,9 @@ namespace BookStoreAPI.server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IOrder>> GetOrderById(int id)//получить заказ по айди
         {
-            IOrder response = await db.Order.FindAsync(id);
-            if (response == null) return NotFound("Order product with id " + id + " not found");
-            return Ok(response);
+            var order = await db.Order.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.order_id == id);
+            if (order == null) return NotFound("Order not found");
+            return Ok(order);
         }
 
         [HttpGet("{id}/item/{itemid}")]

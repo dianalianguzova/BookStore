@@ -5,8 +5,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл 
     const categoryId = urlParams.get('categoryId');
     if (categoryId) getProductsByCategory(categoryId);
-
     getAllCategories();
+    loadCartState();
+  
 });
 
 
@@ -17,10 +18,9 @@ async function getAllCategories() { //получить категории для
         const response = await fetch('https://localhost:5001/categories');
         if (!response.ok) throw new Error('Ошибка загрузки категорий');
         const data = await response.json();
-        categoriesMap = data.categories.reduce((map, category) => {
-            map[category.category_id] = category.name; 
-            return map;
-        }, {});
+        data.categories.forEach(category => {
+            categoriesMap[category.category_id] = category.name;
+        });
         renderCategories(data.categories);
     } catch (error) {
         console.error('Ошибка:', error);

@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
 async function getCartProducts() {
     const userId = localStorage.getItem('userId');
     const sessionId = localStorage.getItem('sessionId');
-    console.log(userId);
-    console.log(sessionId);
     let cartContent = null;
     try {
         let cartId;
@@ -137,7 +135,6 @@ function addCartEventListeners() {
 async function makeOrder() {
     try {
         const authInfo = JSON.parse(localStorage.getItem('authInfo'));
-        console.log('authdd', authInfo);
         if (authInfo?.isAuthenticated) {
             window.location.href = 'order.html';
         } else {
@@ -199,7 +196,6 @@ async function removeCartItem(cartItemId, productId) {
         if (!cartItemElement) return;
         const targetId = userId || sessionId;
         if (!targetId) return;
-        console.log('id', targetId);
 
         const response = await fetch(`https://localhost:5001/cart/${targetId}/item/${cartItemId}`, {
             method: 'DELETE',  

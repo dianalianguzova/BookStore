@@ -18,7 +18,7 @@ namespace BookStoreAPI.server.Model
         public int CartItemId { get; set; }
 
         [Column("order_id")]
-        public int OrderId { get; set; } // Ensure this matches the database column name
+        public int OrderId { get; set; }
 
         [Column("product_id")]
         public int ProductId { get; set; }

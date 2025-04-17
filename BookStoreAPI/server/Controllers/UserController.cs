@@ -80,14 +80,14 @@ namespace BookStoreAPI.server.Controllers
         {
             var user = await db.User.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound("User  not found.");
-            var orders = await db.Order.Where(o => o.user_id == id).ToListAsync();
-            if (orders == null || !orders.Any()) return Ok(new { Message = "No orders found for user with id " + id });
+
+            var orders = await db.Order.Include(o => o.OrderItems).Where(o => o.user_id == id).ToListAsync();
+            if (orders == null) return NotFound("Orders not found.");
             return Ok(orders);
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> PostNewUser([FromBody] User newUser)
-        //string sessionId) // добавление нового пользователя
+        public async Task<IActionResult> PostNewUser([FromBody] User newUser) //регистрация пользователя
         {
             db.User.Add(newUser);
             await db.SaveChangesAsync();
