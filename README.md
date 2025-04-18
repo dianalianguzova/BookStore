@@ -8,12 +8,12 @@ BookStore - книжный интернет-магазин.
 | Entity Framework | HTML/CSS |
 | ASP.NET Core 8.0 |  |
 
-# ER-диаграмма
+# 🗃 ER-диаграмма
 На диаграмме представлена структура таблиц базы данных.
 
 ![ER-диаграмма](ER.png)
 
-# API endpoints
+# 🌐 API endpoints
 ## BookProduct 
 
 | Method | Endpoint | Description | Swagger | Postman |
