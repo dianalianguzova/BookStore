@@ -23,16 +23,6 @@ namespace BookStoreAPI.server.Controllers
             db = dbContext;
         }
 
-        [HttpGet("is-auth")]
-        public IActionResult IsAuthenticated()
-        {
-            return Ok(new
-            {
-                isAuthenticated = User.Identity.IsAuthenticated,
-                userId = User.Identity.IsAuthenticated ? User.FindFirst(ClaimTypes.NameIdentifier)?.Value : null
-            });
-        }
-
         [HttpGet("check-phone/{phone}")]
         public async Task<ActionResult<IUser>> CheckPhone(string phone){
             var user = await db.User.FirstOrDefaultAsync(u => u.Phone == phone);

@@ -77,7 +77,7 @@ namespace BookStoreAPI.server.Controllers
                 totalAmount = items.Count(),
                 date = DateTime.UtcNow,
                 deliveryAddress = user.deliveryAddress,
-                status = "Created",
+                status = "Создан",
                 OrderItems = items
             };
             foreach (var item in newOrder.OrderItems) item.OrderId = newOrder.order_id;

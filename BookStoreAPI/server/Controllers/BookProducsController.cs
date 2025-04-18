@@ -46,29 +46,6 @@ namespace BookStoreAPI.server.Controllers
             return Ok(response);
         }
 
-
-        [HttpGet("/books")]
-        public async Task<ActionResult<IBookList>> GetAllBooks()//получение списка всех книг
-        {
-            IBookList response = new BookProductsList();
-            if (db.BookProduct == null || !db.BookProduct.Any()) return NotFound("Books not found.");
-            var products = db.BookProduct.AsQueryable();
-            var books = products.Where(b => b.CategoryId == 1).ToList();
-            response.BookProducts = books;
-            return Ok(response);
-        }
-
-        [HttpGet("/comics")]
-        public async Task<ActionResult<IBookList>> GetAllComics()//получение списка всех комиксов
-        {
-            IBookList response = new BookProductsList();
-            if (db.BookProduct == null || !db.BookProduct.Any()) return NotFound("Comics not found.");
-            var products = db.BookProduct.AsQueryable();
-            var books = products.Where(b => b.CategoryId == 2).ToList();
-            response.BookProducts = books;
-            return Ok(response);
-        }
-
         [HttpPost("")]
         public async Task<IActionResult> PostNewBookProduct([FromBody] BookProduct newBookProduct)//добавление нового книжного продукта 
         {
