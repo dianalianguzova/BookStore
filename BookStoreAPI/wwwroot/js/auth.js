@@ -143,7 +143,7 @@ async function showProfile(userId) {
         document.getElementById('logout-btn').addEventListener('click', async (e) => { //выйти из профиля
             e.preventDefault();
             await logout();
-            window.location.href = 'bookstore.html';
+         //   window.location.href = 'bookstore.html';
 
         });
         document.getElementById('delete').addEventListener('click', async function () { //удалить профиль

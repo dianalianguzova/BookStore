@@ -23,14 +23,14 @@ namespace BookStoreAPI.server.Controllers
 
 
         [HttpPost("{id}/item")]
-        public async Task<IActionResult> PostCartItem(int id, [FromBody] CartItemRequest request) // добавить продукт в корзину
+        public async Task<IActionResult> PostCartItem(string id, [FromBody] CartItemRequest request) // добавить продукт в корзину
         {
             bool isAuthenticated = request.Auth;
             CartItem newCartItem = request.Item;
             Cart cart;
             if (isAuthenticated)
             {
-                var userId = id;
+                if (!int.TryParse(id, out int userId)) return BadRequest("UserId must be an int.");
                 cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserId == userId);
 
                 if (cart == null)  //если корзина не найдена, создаем новую корзину для пользователя
@@ -42,11 +42,10 @@ namespace BookStoreAPI.server.Controllers
             }
             else
             {
-                var sessionId = id.ToString();
-                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.SessionId == sessionId); 
+                cart = await db.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.SessionId == id); 
                 if (cart == null) //новая сессионная корзина
                 {
-                    cart = new Cart { SessionId = sessionId };
+                    cart = new Cart { SessionId = id };
                     db.Cart.Add(cart);
                     await db.SaveChangesAsync();
                 }

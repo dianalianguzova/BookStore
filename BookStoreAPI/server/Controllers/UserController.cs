@@ -71,7 +71,9 @@ namespace BookStoreAPI.server.Controllers
             var user = await db.User.FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound("User  not found.");
 
-            var orders = await db.Order.Include(o => o.OrderItems).Where(o => o.user_id == id).ToListAsync();
+            var orders = await db.Order.Include(o => o.OrderItems).
+                Where(o => o.user_id == id).OrderByDescending(o => o.date).
+                ToListAsync();
             if (orders == null) return NotFound("Orders not found.");
             return Ok(orders);
         }

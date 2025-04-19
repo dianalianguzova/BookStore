@@ -44,8 +44,8 @@ async function getProductsByCategory(category_id) { //получить все п
         const response = await fetch(`https://localhost:5001/categories/${category_id}`);
         if (!response.ok) throw new Error('Ошибка загрузки товаров');
         const data = await response.json();
-        const categoryName = categoriesMap[category_id];
-        container.innerHTML = `<h2>${categoryName}</h2>`; 
+     //   const categoryName = categoriesMap[category_id];
+   //     container.innerHTML = `<h2>${categoryName}</h2>`; 
         renderProducts(data.bookProducts); 
     } catch (error) {
         console.error('Ошибка:', error);

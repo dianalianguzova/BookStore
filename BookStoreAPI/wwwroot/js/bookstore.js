@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             authInfo = JSON.parse(storedAuthInfo);
             userId = authInfo.userId;
         }
-       // console.log('auth state:', authInfo);
+     //   console.log('auth state:', authInfo + localStorage.getItem('sessionId'));
         if (authInfo.isAuthenticated) {
             await updateCartStateAuth(authInfo.userId);
         } 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         const ordersLink = document.getElementById('orders-link');
         if (ordersLink) {
-            ordersLink.addEventListener('click', function (e) { //вот тут надо бы исправить...:(
+            ordersLink.addEventListener('click', function (e) { 
                 const authInfo = localStorage.getItem('authInfo');
                 if (authInfo && JSON.parse(authInfo).isAuthenticated) window.location.href = 'orders.html';
                 else  window.location.href = 'auth.html';
@@ -103,8 +103,9 @@ export function setGlobalCount(glob) {
     globalCartItemsCount = glob;
 }
 
-function generateSessionId() {
-    return Math.floor(10000000 + Math.random() * 90000000).toString();
+function generateSessionUId() {
+    return crypto.randomUUID();
+  //  return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
 export async function loadPage() {
@@ -112,7 +113,8 @@ export async function loadPage() {
         if (!authInfo.isAuthenticated) {
             sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
-                sessionId = generateSessionId();
+                sessionId = generateSessionUId();
+                console.log(sessionId);
                 localStorage.setItem('sessionId', sessionId);
                 await createNewCart(sessionId);
             }
@@ -377,7 +379,8 @@ export async function logout() { //сброс всех значений при �
         localStorage.removeItem('authInfo');
         localStorage.removeItem('userId');
 
-        sessionId = generateSessionId();
+        sessionId = generateSessionUId();
+       // console.log(sessionId);
         localStorage.setItem('sessionId', sessionId);
         await createNewCart(sessionId);
 

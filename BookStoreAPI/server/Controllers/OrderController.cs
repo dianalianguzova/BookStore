@@ -23,7 +23,7 @@ namespace BookStoreAPI.server.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<IOrderList>> GetAllOrder()//получить все заказы 
         {
-            var orders = await db.Order.Include(o => o.OrderItems).ToListAsync();
+            var orders = await db.Order.Include(o => o.OrderItems).OrderByDescending(o => o.date).ToListAsync();
             if (orders == null || !orders.Any()) return NotFound("Orders not found");
             var orderList = orders.OrderBy(c => c.date).ToList();
             IOrderList response = new OrderList { Orders = orderList };
