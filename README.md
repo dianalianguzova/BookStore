@@ -32,7 +32,7 @@ BookStore - книжный интернет-магазин.
 | GET | `/user/{id}` | Информация о пользователе | [📎 OK](swagger/get_userinfo.png) | [📎 OK](postman/get_userinfo.png) |
 | GET | `/user/{id}/orders` | Получение заказов пользователя | [📎 OK](swagger/get_userorsers.png) | [📎 OK](postman/get_userorsers.png) |
 | GET | `/user/{id}/cart` | Получение корзины пользователя | [📎 OK](swagger/get_usercart.png) | [📎 OK](postman/get_usercart.png) |
-| GET | `/user/check-phone/{phone}` | Проверка на авторизацию по номеру телефона | [📎 OK](swagger/checkphone_user.png) | [📎 OK](postman/checkphone_user.png) |
+| GET | `/user/check-mail/{mail}` | Проверка существования профиля по почте | [📎 OK](swagger/checkphone_user.png) | [📎 OK](postman/checkphone_user.png) |
 | POST | `/user/register` | Регистрация нового пользователя | [📎 OK](swagger/post_newuser.png) | [📎 OK](postman/post_newuser.png) |
 | PUT | `/user/{id}` | Изменение данных пользователя | [📎 OK](swagger/put_user.png) | [📎 OK](postman/put_user.png) |
 | DELETE | `/user/{id}` | Удаление пользователя | [📎 OK](swagger/delete_user.png) | [📎 OK](postman/delete_user.png) |
