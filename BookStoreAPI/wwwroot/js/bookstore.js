@@ -401,15 +401,3 @@ window.onbeforeunload = function () {
     sessionStorage.removeItem('authChecked');
  // localStorage.clear();
 };
-
-
-//export async function checkAuth() {
-//    try {
-//        const response = await fetch('https://localhost:5001/user/is-auth');
-//        const data = await response.json();
-//        return data;
-//    } catch (error) {
-//        console.error('Ошибка при проверке авторизации:', error);
-//        return { isAuthenticated: false, userId: null };
-//    }
-//}

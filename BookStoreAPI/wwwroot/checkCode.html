@@ -1,0 +1,42 @@
+﻿
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="vs_showBrowserLink" content="false" />
+    <title>Book Store</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="icon" href="/images/logo.png" type="image/png">
+</head>
+<body>
+    <div class="header">
+        <h1><a href="bookstore.html" style="text-decoration: none; color: inherit;">Book Store</a></h1>
+    </div>
+
+    <main class="main-content">
+        <div class="auth-container">
+            <div class="auth-form">
+                <h2>Введите 4-значный код из письма на вашей почте</h2>
+
+                <div class="code-inputs">
+                    <input type="text" maxlength="1" class="code-input" data-index="1">
+                    <input type="text" maxlength="1" class="code-input" data-index="2">
+                    <input type="text" maxlength="1" class="code-input" data-index="3">
+                    <input type="text" maxlength="1" class="code-input" data-index="4">
+                </div>
+
+                <button id="verify-code-btn">Подтвердить</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-title">Контакты</div>
+        <div class="links">
+            <a href="#">Telegram</a>
+            <a href="#">VK</a>
+        </div>
+    </footer>
+    <script type="module" src="/js/checkCode.js"></script>
+</body>
+</html>

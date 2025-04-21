@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\checkCode.html" />
     <None Include="wwwroot\images\logo.png" />
   </ItemGroup>
 

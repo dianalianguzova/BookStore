@@ -23,9 +23,9 @@ namespace BookStoreAPI.server.Controllers
             db = dbContext;
         }
 
-        [HttpGet("check-phone/{phone}")]
-        public async Task<ActionResult<IUser>> CheckPhone(string phone){
-            var user = await db.User.FirstOrDefaultAsync(u => u.Phone == phone);
+        [HttpGet("check-mail/{mail}")]
+        public async Task<ActionResult<IUser>> CheckPhone(string mail){
+            var user = await db.User.FirstOrDefaultAsync(u => u.Email == mail);
             if (user == null) return NotFound("User  not found.");
             IUser response = user;
             return Ok(response);
@@ -105,9 +105,7 @@ namespace BookStoreAPI.server.Controllers
         {
             var user = await db.User.FindAsync(id);
             if (user == null) return NotFound("User not found.");
-            var cart = await db.Cart.FirstOrDefaultAsync(c => c.UserId == id);
-            if (cart != null) db.Cart.Remove(cart);
-            db.User.Remove(user);
+            user.isDeleted = true;
             await db.SaveChangesAsync();
             return NoContent();
         }

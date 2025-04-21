@@ -3,9 +3,10 @@
 document.addEventListener('DOMContentLoaded', async function () {
     try {
         if (authInfo.isAuthenticated) {
+            console.log(authInfo);
             showProfile(authInfo.userId);
         } else {
-            showPhoneForm();
+            showMailForm();
         }
     }
     catch (error) {
@@ -13,39 +14,45 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 });
 
-const phoneForm = document.getElementById('phone-form');
 const registerForm = document.getElementById('register-form');
 const profileSection = document.getElementById('profile-section');
 const updateProfile = document.getElementById('update-profile');
+const mailForm = document.getElementById('mail-form');
 
-function showPhoneForm() {
-    phoneForm.style.display = 'block';
+function showMailForm() {
+    mailForm.style.display = 'block';
     registerForm.style.display = 'none';
     profileSection.style.display = 'none';
     updateProfile.style.display = 'none';
 
-    const checkPhoneBtn = document.getElementById('check-phone-btn');
-    const phone = document.getElementById('phone');
-    checkPhoneBtn.addEventListener('click', function () {
-        const phoneValue = phone.value.trim();
-        const phoneRegex = /^\+7[0-9]{10}$/;
-        if (!phoneRegex.test(phoneValue))  return; 
-
-        checkPhone(); 
+    const checkMailBtn = document.getElementById('check-mail-btn');
+    const mailInput = document.getElementById('mail');
+    checkMailBtn.addEventListener('click', function () {
+        const mailValue = mailInput.value.trim();
+        const mailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (!mailRegex.test(mailValue)) {
+            return;
+        }
+        checkMail();
     });
 }
 
-async function checkPhone() {
-    const phone = document.getElementById('phone').value;
+async function checkMail() {
+    const mail = document.getElementById('mail').value;
     try {
-        const response = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(phone)}`);
-        if (response.ok) { //если есть в системе, то показать профиль
+        const response = await fetch(`https://localhost:5001/user/check-mail/${(mail)}`);
+        if (response.ok) {
             const data = await response.json();
-            setAuth(data.userId);
-            showProfile(data.userId);
+            //if (data.isDeleted) {
+
+            //}
+            //else {
+                window.location.href = `checkCode.html?id=${data.userId}`;
+                showProfile(data.userId);
+          //  }
         }
         else if (response.status == 404) { //нет в системе - попросить зарегестрироваться
-            showRegisterForm(phone);
+            showRegisterForm();
         }
     } catch (error) {
         window.location.href = 'https://localhost:5001/error.html';
@@ -53,7 +60,7 @@ async function checkPhone() {
     }
 }
 
-function showRegisterForm(phone) {
+function showRegisterForm() {
     phoneForm.style.display = 'none';
     updateProfile.style.display = 'none';
     registerForm.style.display = 'block';
@@ -63,12 +70,15 @@ function showRegisterForm(phone) {
         const surname = document.getElementById('surname').value.trim();
         const email = document.getElementById('email').value.trim();
         const address = document.getElementById('address').value.trim();
+        const phone = document.getElementById('phone').value.trim();
 
         if (!name) return;
         if (!surname) return;
         if (!email) return;
         if (!address) return;
-        
+        if (!phone) return;
+
+        const phoneRegex = /^\+7[0-9]{10}$/;
         const nameRegex = /^[A-ZА-Я][a-zа-я]*$/;
         const surnameRegex = /^[A-ZА-Я][a-zа-я]*$/;
         const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -76,6 +86,7 @@ function showRegisterForm(phone) {
         if (!nameRegex.test(name))  return;   
         if (!surnameRegex.test(surname)) return;
         if (!emailRegex.test(email)) return;
+        if (!phoneRegex.test(phone)) return;
 
         const userData = {
             phone: phone,
@@ -95,8 +106,7 @@ async function registerNewUser(userData) {
         console.error('Ошибка:', error);
     }
 }
-
-async function showProfile(userId) {
+ async function showProfile(userId) {
     try {
         const response = await fetch(`/user/${userId}`);
         const user = await response.json();
@@ -118,7 +128,7 @@ async function showProfile(userId) {
                 <span class="info-value">${user.deliveryAddress}</span>
             </div>`;
 
-        phoneForm.style.display = 'none';
+        mailForm.style.display = 'none';
         registerForm.style.display = 'none';
         profileSection.style.display = 'block';
         updateProfile.style.display = 'none';
@@ -129,7 +139,7 @@ async function showProfile(userId) {
             document.getElementById('update-email').value = user.email || '';
             document.getElementById('update-address').value = user.deliveryAddress || '';
 
-            phoneForm.style.display = 'none';
+            mailForm.style.display = 'none';
             registerForm.style.display = 'none';
             profileSection.style.display = 'none';
             updateProfile.style.display = 'block';
@@ -143,7 +153,7 @@ async function showProfile(userId) {
         document.getElementById('logout-btn').addEventListener('click', async (e) => { //выйти из профиля
             e.preventDefault();
             await logout();
-         //   window.location.href = 'bookstore.html';
+            window.location.href = 'bookstore.html';
 
         });
         document.getElementById('delete').addEventListener('click', async function () { //удалить профиль

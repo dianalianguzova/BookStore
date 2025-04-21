@@ -167,6 +167,21 @@ h2 {
         }
 
 
+.code-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+    .code-inputs input {
+        width: 40px;
+        height: 50px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+
 footer {
     background-color: #4f3e4a;
     color: white;
