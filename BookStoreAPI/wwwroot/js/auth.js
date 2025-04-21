@@ -3,13 +3,13 @@
 document.addEventListener('DOMContentLoaded', async function () {
     try {
         if (authInfo.isAuthenticated) {
-            console.log(authInfo);
             showProfile(authInfo.userId);
         } else {
             showMailForm();
         }
     }
     catch (error) {
+        window.location.href = 'error.html';
         console.error('Ошибка:', error);
     }
 });
@@ -52,7 +52,7 @@ async function checkMail() {
           //  }
         }
         else if (response.status == 404) { //нет в системе - попросить зарегестрироваться
-            showRegisterForm();
+            showRegisterForm(mail);
         }
     } catch (error) {
         window.location.href = 'https://localhost:5001/error.html';
@@ -60,32 +60,29 @@ async function checkMail() {
     }
 }
 
-function showRegisterForm() {
-    phoneForm.style.display = 'none';
+function showRegisterForm(email) {
+    console.log(email);
+    mailForm.style.display = 'none';
     updateProfile.style.display = 'none';
     registerForm.style.display = 'block';
 
     document.getElementById('register-btn').addEventListener('click', () => {
         const name = document.getElementById('name').value.trim();
         const surname = document.getElementById('surname').value.trim();
-        const email = document.getElementById('email').value.trim();
         const address = document.getElementById('address').value.trim();
         const phone = document.getElementById('phone').value.trim();
 
         if (!name) return;
         if (!surname) return;
-        if (!email) return;
         if (!address) return;
         if (!phone) return;
 
         const phoneRegex = /^\+7[0-9]{10}$/;
         const nameRegex = /^[A-ZА-Я][a-zа-я]*$/;
         const surnameRegex = /^[A-ZА-Я][a-zа-я]*$/;
-        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
         if (!nameRegex.test(name))  return;   
         if (!surnameRegex.test(surname)) return;
-        if (!emailRegex.test(email)) return;
         if (!phoneRegex.test(phone)) return;
 
         const userData = {
@@ -93,7 +90,8 @@ function showRegisterForm() {
             name: name,
             surname: surname,
             email: email,
-            deliveryAddress: address
+            deliveryAddress: address,
+            isDeleted: false
         };
         registerNewUser(userData);
     });
@@ -136,7 +134,7 @@ async function registerNewUser(userData) {
         document.getElementById('edit-profile').addEventListener('click', function () { //изменить профиль
             document.getElementById('update-name').value = user.name || '';
             document.getElementById('update-surname').value = user.surname || '';
-            document.getElementById('update-email').value = user.email || '';
+            document.getElementById('update-phone').value = user.phone || '';
             document.getElementById('update-address').value = user.deliveryAddress || '';
 
             mailForm.style.display = 'none';
@@ -146,7 +144,7 @@ async function registerNewUser(userData) {
         });
 
         document.getElementById('update-btn').addEventListener('click', async function () {
-            await updateUser(userId);
+            await updateUser(userId, user.email);
 
         });
 
@@ -156,10 +154,10 @@ async function registerNewUser(userData) {
             window.location.href = 'bookstore.html';
 
         });
-        document.getElementById('delete').addEventListener('click', async function () { //удалить профиль
-            await deleteUser(userId);
-            window.location.href = 'bookstore.html';
-        });
+        //document.getElementById('delete').addEventListener('click', async function () { //удалить профиль
+        //    await deleteUser(userId);
+        //    window.location.href = 'bookstore.html';
+        //});
 
 
     } catch (error) {
@@ -167,31 +165,33 @@ async function registerNewUser(userData) {
     }
 }
 
-async function updateUser(userId) {
+async function updateUser(userId, email) {
     try {
         const name = document.getElementById('update-name').value.trim();
         const surname = document.getElementById('update-surname').value.trim();
-        const email = document.getElementById('update-email').value.trim();
+        const phone = document.getElementById('update-phone').value.trim();
         const address = document.getElementById('update-address').value.trim();
 
         if (!name) return;
         if (!surname) return;
-        if (!email) return;
+        if (!phone) return;
         if (!address) return;
 
+        const phoneRegex = /^\+7[0-9]{10}$/;
         const nameRegex = /^[A-ZА-Я][a-zа-я]*$/;
         const surnameRegex = /^[A-ZА-Я][a-zа-я]*$/;
-        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
         if (!nameRegex.test(name)) return;
         if (!surnameRegex.test(surname)) return;
-        if (!emailRegex.test(email)) return;
+        if (!phoneRegex.test(phone)) return;
 
         const updatedData = {
             name,
             surname: surname, 
-            email,
-            deliveryAddress: address
+            phone: phone,
+            deliveryAddress: address,
+            email:email,
+            isDeleted: false
         };
 
         const response = await fetch(`https://localhost:5001/user/${userId}`, {

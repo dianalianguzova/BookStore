@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             authInfo = JSON.parse(storedAuthInfo);
             userId = authInfo.userId;
         }
-     //   console.log('auth state:', authInfo + localStorage.getItem('sessionId'));
         if (authInfo.isAuthenticated) {
             await updateCartStateAuth(authInfo.userId);
         } 
@@ -31,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     } catch (error) {
         console.error('Ошибка:', error);
+        window.location.href = 'error.html';
     }
 });
 
@@ -96,7 +96,6 @@ export function setAuth(userId) {
     };
     localStorage.setItem('authInfo', JSON.stringify(authInfo));
     localStorage.setItem('userId', userId);
-   // console.log('Auth updated:', authInfo);
 }
 
 export function setGlobalCount(glob) { 
@@ -105,7 +104,6 @@ export function setGlobalCount(glob) {
 
 function generateSessionUId() {
     return crypto.randomUUID();
-  //  return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
 export async function loadPage() {
@@ -148,6 +146,7 @@ export async function deleteUser(userId) {
 
 export async function registerUser(userData) {
     try {
+        console.log(userData);
         const response = await fetch('https://localhost:5001/user/register', {
             method: 'POST',
             headers: {
@@ -156,9 +155,9 @@ export async function registerUser(userData) {
             body: JSON.stringify(userData)
         });
 
-        moveProducts();
-        const user = await fetch(`https://localhost:5001/user/check-phone/${encodeURIComponent(userData.phone)}`)
+        const user = await fetch(`https://localhost:5001/user/check-mail/${encodeURIComponent(userData.mail)}`)
         const resp = await user.json(); //достаем айдишку
+        moveProducts();
         setAuth(resp.userId);
         return await response.json();
     }

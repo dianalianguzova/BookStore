@@ -2,11 +2,17 @@
 
 const container = document.querySelector('.products-container');
 document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл 
-    const categoryId = urlParams.get('categoryId');
-    if (categoryId) getProductsByCategory(categoryId);
-    getAllCategories();
-    loadCartState();
+    try {
+        const urlParams = new URLSearchParams(window.location.search); //ищет параметры в юрл 
+        const categoryId = urlParams.get('categoryId');
+        if (categoryId) getProductsByCategory(categoryId);
+        getAllCategories();
+        loadCartState();
+    }
+    catch (error) {
+        window.location.href = 'error.html';
+        console.error('Ошибка', error);
+    }
   
 });
 
@@ -44,8 +50,8 @@ async function getProductsByCategory(category_id) { //получить все п
         const response = await fetch(`https://localhost:5001/categories/${category_id}`);
         if (!response.ok) throw new Error('Ошибка загрузки товаров');
         const data = await response.json();
-     //   const categoryName = categoriesMap[category_id];
-   //     container.innerHTML = `<h2>${categoryName}</h2>`; 
+        const categoryName = categoriesMap[category_id];
+        container.innerHTML = `<h2>${categoryName}</h2>`; 
         renderProducts(data.bookProducts); 
     } catch (error) {
         console.error('Ошибка:', error);

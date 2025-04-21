@@ -1,6 +1,12 @@
 ﻿document.addEventListener('DOMContentLoaded', async () => {
-    const authInfo = JSON.parse(localStorage.getItem('authInfo'));
-    await getAllOrders(authInfo.userId);
+    try {
+        const authInfo = JSON.parse(localStorage.getItem('authInfo'));
+        await getAllOrders(authInfo.userId);
+    }
+    catch (error) {
+        window.location.href = 'error.html';
+        console.error('Ошибка', error);
+    }
 });
 
 async function getAllOrders(userId) {

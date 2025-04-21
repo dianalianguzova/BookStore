@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (codeInputs.length && verifyBtn) {
         codeInputs.forEach((input, index) => {
-            input.addEventListener('input', function () {
+            input.addEventListener('input', function () { //переход на след поле
                 if (this.value.length === 1 && index < codeInputs.length - 1) {
                     codeInputs[index + 1].focus();
                 }

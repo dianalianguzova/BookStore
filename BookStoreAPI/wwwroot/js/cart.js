@@ -1,7 +1,13 @@
 ﻿import { cartItemsCount, userId, sessionId,globalCartItemsCount, authInfo, setGlobalCount, saveCartState} from './bookstore.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    getCartProducts();
+    try {
+        getCartProducts();
+    }
+    catch (error) {
+        window.location.href = 'error.html';
+        console.error("Ошибка", error);
+    }
 });
 
 async function getCartProducts() {

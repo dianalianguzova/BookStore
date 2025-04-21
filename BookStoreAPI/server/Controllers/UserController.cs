@@ -57,8 +57,7 @@ namespace BookStoreAPI.server.Controllers
             if (user == null) return NotFound();
             user.Name = updatedUser.Name;
             user.Surname = updatedUser.Surname;
-          //  user.Phone = updatedUser.Phone;
-            user.Email = updatedUser.Email;
+            user.Phone = updatedUser.Phone;
             user.deliveryAddress = updatedUser.deliveryAddress;
             await db.SaveChangesAsync();
             return NoContent();

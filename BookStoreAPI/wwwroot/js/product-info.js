@@ -1,13 +1,18 @@
 ﻿import { addToCart, loadPage, loadCartState, cartItemsCount } from './bookstore.js';
 document.addEventListener('DOMContentLoaded', function () {
-    loadPage();
-    loadCartState();
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    const container = document.getElementById('product-info-container');
-    if (!productId) return; 
-    
-    getProductInfo(productId);
+    try {
+        loadPage();
+        loadCartState();
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const container = document.getElementById('product-info-container');
+        if (!productId) return;
+        getProductInfo(productId);
+    }
+    catch (error) {
+        window.location.href = 'error.html';
+        console.error('Ошибка', error);
+    }
 });
 
 async function getProductInfo(productId) {
